@@ -180,6 +180,7 @@ body {
   overflow-y: auto;
   min-width: 0;
 }
+.panel { bottom: -4px; }
 .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .panel-head h2 { margin: 0; font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .panel-head .ghost { padding: 5px 12px; font-size: 0.78rem; }
@@ -295,6 +296,11 @@ body {
 @media (max-height: 600px) {
   .keys { grid-auto-rows: 42px; gap: 6px; }
 }
+@media (max-height: 520px) {
+  .keys { grid-auto-rows: 34px; gap: 4px; }
+  .key { font-size: 1.15rem; border-radius: 10px; }
+  .screen { min-height: 70px; }
+}
 </style>
 </head>
 <body>
@@ -364,6 +370,7 @@ body {
       <div class="seg" role="group" aria-label="Devise">
         <button class="chip" type="button" data-cur="EUR" aria-pressed="true">EUR</button>
         <button class="chip" type="button" data-cur="USD" aria-pressed="false">USD</button>
+        <button class="chip" type="button" data-cur="CNY" aria-pressed="false">CNY</button>
         <button class="chip dir" id="convDir" type="button" aria-label="Inverser le sens de la conversion">EUR → Ar</button>
       </div>
       <div class="field">
@@ -506,12 +513,12 @@ body {
 (function () {
   var SYM = { "+": "+", "-": "−", "*": "×", "/": "÷" };
   var OPS = "+-*/";
-  var DEFAULT_RATES = { EUR: 5100, USD: 4545 };
+  var DEFAULT_RATES = { EUR: 5100, USD: 4545, CNY: 673 };
   var RATE_DATE = "15 oct. 2026";
-  var CUR_SYM = { EUR: "€", USD: "$" };
+  var CUR_SYM = { EUR: "€", USD: "$", CNY: "¥" };
 
   var st = { tokens: [], cur: "", fresh: false, error: false, history: [] };
-  var conv = { cur: "EUR", toAr: true, rates: { EUR: DEFAULT_RATES.EUR, USD: DEFAULT_RATES.USD } };
+  var conv = { cur: "EUR", toAr: true, rates: { EUR: DEFAULT_RATES.EUR, USD: DEFAULT_RATES.USD, CNY: DEFAULT_RATES.CNY } };
 
   var elExpr = document.getElementById("expr");
   var elMain = document.getElementById("main");
@@ -536,10 +543,10 @@ body {
   try {
     var sc = JSON.parse(localStorage.getItem("kajy-conv") || "null");
     if (sc && typeof sc === "object") {
-      if (sc.cur === "EUR" || sc.cur === "USD") conv.cur = sc.cur;
+      if (sc.cur === "EUR" || sc.cur === "USD" || sc.cur === "CNY") conv.cur = sc.cur;
       if (typeof sc.toAr === "boolean") conv.toAr = sc.toAr;
       if (sc.rates) {
-        ["EUR", "USD"].forEach(function (c) {
+        ["EUR", "USD", "CNY"].forEach(function (c) {
           var r = Number(sc.rates[c]);
           if (isFinite(r) && r > 0) conv.rates[c] = r;
         });
