@@ -143,7 +143,7 @@ body {
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: clamp(48px, 8.2vh, 70px);
+  grid-auto-rows: clamp(46px, 7.4vh, 66px);
   gap: 10px;
 }
 .key {
@@ -234,6 +234,61 @@ body {
 }
 .btn:disabled { opacity: 0.4; cursor: default; }
 
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--fn); border-radius: 999px; }
+.tab {
+  flex: 1; min-width: 0;
+  font: inherit; font-size: 0.9rem; font-weight: 600;
+  padding: 8px 6px; border: 0; border-radius: 999px;
+  background: transparent; color: var(--ink); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tab[aria-selected="true"] { background: var(--op); color: var(--op-ink); }
+.tab:focus-visible, .mv-x:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.view { flex: 1 1 0; min-height: 0; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 6px; }
+.view h3 { margin: 0; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stock-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.row { display: flex; gap: 8px; align-items: flex-end; min-width: 0; }
+.grow { flex: 1 1 0; min-width: 0; }
+.grow2 { flex: 2 1 0; min-width: 0; }
+.in {
+  font-family: var(--font-num); font-size: 1.2rem;
+  background: var(--key); color: var(--ink);
+  border: 1.5px solid var(--key-edge); border-radius: 12px;
+  padding: 9px 12px; width: 100%; box-sizing: border-box;
+  text-align: right; min-width: 0;
+}
+.in.left, select.in { text-align: left; font-family: var(--font-ui); font-size: 1rem; }
+.create { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1.5px solid var(--key-edge); border-radius: 14px; }
+.lvl { font-family: var(--font-num); font-weight: 300; font-size: clamp(2.8rem, 15vw, 4rem); line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.lvl[data-neg="1"] { color: var(--clear); }
+.sub { color: var(--muted); font-size: 0.9rem; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 8px; }
+.stat { border-top: 2px solid var(--key-edge); padding-top: 6px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stat span { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stat b { font-family: var(--font-num); font-weight: 500; font-size: 1.1rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.form { display: flex; flex-direction: column; gap: 10px; }
+.btn.sortie { background: var(--eq); color: var(--eq-ink); }
+.btn.big { flex: 1 1 0; padding: 15px 10px; font-size: 1.05rem; border-radius: 14px; }
+.msg { margin: 0; min-height: 1.3em; font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+.msg[data-warn="1"] { color: var(--clear); font-weight: 600; }
+.inv { display: flex; flex-direction: column; gap: 8px; }
+.log ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.log li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--key-edge); }
+.log li.none { color: var(--muted); font-size: 0.9rem; }
+.mv-l { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mv-q { font-family: var(--font-num); font-size: 1.15rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.mv-q.pos { color: var(--focus); }
+.mv-q.neg { color: var(--clear); }
+.mv-m { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
+.mv-x { font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: 1.5px solid var(--key-edge); border-radius: 999px; padding: 5px 10px; cursor: pointer; flex: none; }
+.ghost.danger { color: var(--clear); border-color: var(--clear); align-self: flex-start; }
+.res { margin: 0; display: flex; flex-direction: column; }
+.res > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 0; border-top: 1px solid var(--key-edge); }
+.res dt { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+.res dd { margin: 0; font-family: var(--font-num); font-weight: 300; font-size: clamp(1.5rem, 8vw, 2.1rem); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; min-width: 0; }
+.break { margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.4; }
+
 @media (prefers-reduced-motion: no-preference) {
   .key { transition: transform 0.06s ease, box-shadow 0.06s ease; }
 }
@@ -249,7 +304,13 @@ body {
     <button class="ghost" id="histBtn" type="button" aria-expanded="false" aria-controls="history">Historique</button>
   </div>
 
-  <div class="stage">
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" id="tabCalc" role="tab" aria-selected="true" type="button">Calcul</button>
+    <button class="tab" id="tabStock" role="tab" aria-selected="false" type="button">Stock</button>
+    <button class="tab" id="tabCartons" role="tab" aria-selected="false" type="button">Cartons</button>
+  </div>
+
+  <div class="stage" id="viewCalc">
     <div class="screen">
       <div class="expr" id="expr" aria-hidden="true"></div>
       <div class="main" id="main" data-size="s1" role="status" aria-live="polite">0</div>
@@ -322,6 +383,124 @@ body {
       </div>
     </section>
   </div>
+
+  <section class="view" id="viewStock" hidden aria-label="Stock du magasin">
+    <div class="row">
+      <div class="field grow">
+        <label for="stArticle">Article</label>
+        <select id="stArticle" class="in"></select>
+      </div>
+      <button class="ghost" id="stNew" type="button">Nouvel article</button>
+    </div>
+
+    <div class="create" id="stCreate" hidden>
+      <div class="field">
+        <label for="crName">Nom de l'article</label>
+        <input id="crName" class="in left" type="text" autocomplete="off" maxlength="40" placeholder="Ex. Huile 5 L">
+      </div>
+      <div class="row">
+        <div class="field grow">
+          <label for="crUnit">Unité</label>
+          <input id="crUnit" class="in left" type="text" autocomplete="off" maxlength="16" placeholder="cartons, sacs">
+        </div>
+        <div class="field grow">
+          <label for="crStart">Stock de départ</label>
+          <input id="crStart" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+        </div>
+      </div>
+      <p class="msg" id="crMsg" role="status" aria-live="polite"></p>
+      <div class="actions">
+        <button class="ghost" id="crCancel" type="button">Annuler</button>
+        <button class="btn" id="crOk" type="button">Créer l'article</button>
+      </div>
+    </div>
+
+    <p class="empty" id="stEmptyMsg" hidden>Aucun article. Touchez « Nouvel article » pour suivre ses entrées et ses sorties.</p>
+
+    <div class="stock-main" id="stMain">
+      <div>
+        <div class="lvl" id="stCurrent" role="status" aria-live="polite">0</div>
+        <div class="sub" id="stUnit">en stock</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span>Départ</span><b id="stStart">0</b></div>
+        <div class="stat"><span>Entrées</span><b id="stIn">0</b></div>
+        <div class="stat"><span>Sorties</span><b id="stOut">0</b></div>
+        <div class="stat" id="stAdjBox" hidden><span>Ajust.</span><b id="stAdj">0</b></div>
+      </div>
+
+      <div class="form">
+        <div class="row">
+          <div class="field grow">
+            <label for="stQty">Quantité</label>
+            <input id="stQty" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+          </div>
+          <div class="field grow2">
+            <label for="stNote">Note (facultatif)</label>
+            <input id="stNote" class="in left" type="text" autocomplete="off" maxlength="60" placeholder="Bon, client, fournisseur">
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn sortie big" id="stBtnOut" type="button">− Sortie</button>
+          <button class="btn big" id="stBtnIn" type="button">+ Entrée</button>
+        </div>
+        <p class="msg" id="stMsg" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="inv">
+        <h3>Inventaire</h3>
+        <div class="row">
+          <div class="field grow">
+            <label for="stCount">Quantité comptée</label>
+            <input id="stCount" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+          </div>
+          <button class="ghost" id="stAdjust" type="button" disabled>Ajuster le stock</button>
+        </div>
+        <p class="msg" id="stGap" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="log">
+        <h3>Mouvements</h3>
+        <ul id="stLog"></ul>
+      </div>
+
+      <button class="ghost danger" id="stDel" type="button" data-armed="0">Supprimer cet article</button>
+    </div>
+  </section>
+
+  <section class="view" id="viewCartons" hidden aria-label="Cartons, palettes et pièces">
+    <div class="row">
+      <div class="field grow">
+        <label for="pkPer">Pièces par carton</label>
+        <input id="pkPer" class="in" type="text" inputmode="decimal" autocomplete="off" value="24">
+      </div>
+      <div class="field grow">
+        <label for="pkPal">Cartons par palette</label>
+        <input id="pkPal" class="in" type="text" inputmode="decimal" autocomplete="off" value="40">
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="Unité de la quantité saisie">
+      <button class="chip" id="pkUPieces" type="button" data-unit="pieces" aria-pressed="true">Pièces</button>
+      <button class="chip" id="pkUCartons" type="button" data-unit="cartons" aria-pressed="false">Cartons</button>
+      <button class="chip" id="pkUPalettes" type="button" data-unit="palettes" aria-pressed="false">Palettes</button>
+    </div>
+    <div class="field">
+      <label for="pkQty" id="pkQtyLbl">Quantité en pièces</label>
+      <input id="pkQty" class="in" type="text" inputmode="decimal" autocomplete="off" value="250">
+    </div>
+    <dl class="res" role="status" aria-live="polite">
+      <div><dt>Pièces</dt><dd id="pkPieces">—</dd></div>
+      <div><dt>Cartons</dt><dd id="pkCartons">—</dd></div>
+      <div><dt>Palettes</dt><dd id="pkPalettes">—</dd></div>
+    </dl>
+    <p class="break" id="pkBreak"></p>
+    <p class="note" id="pkNeed"></p>
+    <p class="note">Les valeurs 24 et 40 sont des exemples. Entrez celles de votre article, elles sont gardées sur le téléphone.</p>
+    <div class="actions">
+      <button class="btn" id="pkSend" type="button">Envoyer à la calculatrice</button>
+    </div>
+  </section>
 </div>
 <script>
 (function () {
@@ -770,7 +949,7 @@ body {
     if (k === "Escape" && panelOpen()) { showPanel(null); return; }
     var t = ev.target;
     if (t && t.tagName === "INPUT") return;
-    if (panelOpen()) return;
+    if (panelOpen() || tab !== "calc") return;
     if (t && t.closest && t.closest("button") && (k === "Enter" || k === " ")) return;
     if (k.length === 1 && k >= "0" && k <= "9") press(k);
     else if (k === "," || k === ".") press(".");
@@ -783,7 +962,391 @@ body {
     else if (k === "Escape" || k === "Delete") press("C");
   });
 
+  // ---- Onglets ----
+  function gid(id) { return document.getElementById(id); }
+  var tab = "calc";
+  var TABS = ["calc", "stock", "cartons"];
+  var viewEl = { calc: gid("viewCalc"), stock: gid("viewStock"), cartons: gid("viewCartons") };
+  var tabEl = { calc: gid("tabCalc"), stock: gid("tabStock"), cartons: gid("tabCartons") };
+
+  function showTab(name) {
+    tab = name;
+    TABS.forEach(function (n) {
+      viewEl[n].hidden = n !== name;
+      tabEl[n].setAttribute("aria-selected", n === name ? "true" : "false");
+    });
+    btnHist.hidden = name !== "calc";
+    if (name !== "calc") showPanel(null);
+    if (name === "stock") renderStock();
+    if (name === "cartons") renderCartons();
+    try { localStorage.setItem("kajy-tab", name); } catch (e) {}
+  }
+  TABS.forEach(function (n) {
+    tabEl[n].addEventListener("click", function () { showTab(n); });
+  });
+
+  function fq(n) { var t = toStr(n); return t === null ? "0" : fmtNum(t); }
+  function pl(n, one, many) { return n >= 2 ? many : one; }
+  function fmtDate(t) {
+    var d = new Date(t);
+    function p(x) { return (x < 10 ? "0" : "") + x; }
+    return p(d.getDate()) + "/" + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function setMsg(el, text, warn) {
+    el.textContent = text;
+    el.setAttribute("data-warn", warn ? "1" : "0");
+  }
+  function focusEl(el) { try { el.focus(); } catch (e) {} }
+
+  // ---- Stock du magasin ----
+  var KIND = { "in": "Entrée", "out": "Sortie", "adj": "Ajustement" };
+  var stock = { sel: null, items: [] };
+  var stockKnown = false;
+  function okItem(x) { return x && typeof x.id === "string" && typeof x.name === "string" && Array.isArray(x.moves); }
+  try {
+    var ss = JSON.parse(localStorage.getItem("kajy-stock") || "null");
+    if (ss && Array.isArray(ss.items)) {
+      stock = { sel: ss.sel || null, items: ss.items.filter(okItem) };
+      stockKnown = true;
+    }
+  } catch (e) {}
+  if (!stockKnown) {
+    var DAY = 86400000;
+    stock.items = [{
+      id: "exemple", name: "Exemple : sacs de riz", unit: "sacs", start: 100,
+      moves: [
+        { t: Date.now() - 2 * DAY, q: 40, kind: "in", note: "Livraison fournisseur" },
+        { t: Date.now() - DAY, q: -25, kind: "out", note: "Commande client" }
+      ]
+    }];
+    stock.sel = "exemple";
+  }
+  function saveStock() { try { localStorage.setItem("kajy-stock", JSON.stringify(stock)); } catch (e) {} }
+
+  var elSel = gid("stArticle");
+  var elCreate = gid("stCreate");
+  var elMainBox = gid("stMain");
+  var elNoItem = gid("stEmptyMsg");
+  var elLog = gid("stLog");
+  var inQty = gid("stQty");
+  var inNote = gid("stNote");
+  var inCount = gid("stCount");
+  var btnAdjust = gid("stAdjust");
+  var btnDel = gid("stDel");
+  var elStMsg = gid("stMsg");
+  var elGap = gid("stGap");
+  var crMsg = gid("crMsg");
+  var delTimer = null;
+
+  function curItem() {
+    for (var i = 0; i < stock.items.length; i++) {
+      if (stock.items[i].id === stock.sel) return stock.items[i];
+    }
+    return stock.items[0] || null;
+  }
+  function level(it) {
+    var v = Number(it.start) || 0;
+    it.moves.forEach(function (m) { v += m.q; });
+    return parseFloat(v.toPrecision(12));
+  }
+  function sumKind(it, kind) {
+    var v = 0;
+    it.moves.forEach(function (m) { if (m.kind === kind) v += m.q; });
+    return parseFloat(v.toPrecision(12));
+  }
+  function disarmDel() {
+    btnDel.setAttribute("data-armed", "0");
+    btnDel.textContent = "Supprimer cet article";
+    if (delTimer) { clearTimeout(delTimer); delTimer = null; }
+  }
+
+  function renderStock() {
+    var it = curItem();
+    if (it) stock.sel = it.id;
+    elNoItem.hidden = !!it;
+    elMainBox.hidden = !it;
+    elSel.hidden = !it;
+    elSel.textContent = "";
+    stock.items.forEach(function (x) {
+      var o = document.createElement("option");
+      o.value = x.id;
+      o.textContent = x.name;
+      elSel.appendChild(o);
+    });
+    if (!it) { elCreate.hidden = false; return; }
+    elSel.value = it.id;
+
+    var lv = level(it);
+    var cur = gid("stCurrent");
+    cur.textContent = fq(lv);
+    cur.setAttribute("data-neg", lv < 0 ? "1" : "0");
+    gid("stUnit").textContent = it.unit ? it.unit + " en stock" : "en stock";
+    gid("stStart").textContent = fq(Number(it.start) || 0);
+    gid("stIn").textContent = fq(sumKind(it, "in"));
+    gid("stOut").textContent = fq(Math.abs(sumKind(it, "out")));
+    var adj = sumKind(it, "adj");
+    gid("stAdjBox").hidden = adj === 0;
+    gid("stAdj").textContent = (adj > 0 ? "+" : "") + fq(adj);
+
+    elLog.textContent = "";
+    if (!it.moves.length) {
+      var none = document.createElement("li");
+      none.className = "none";
+      none.textContent = "Aucun mouvement. Notez une entrée ou une sortie ci-dessus.";
+      elLog.appendChild(none);
+    }
+    for (var i = it.moves.length - 1, n = 0; i >= 0 && n < 100; i--, n++) {
+      var m = it.moves[i];
+      var li = document.createElement("li");
+      var left = document.createElement("div");
+      left.className = "mv-l";
+      var q = document.createElement("b");
+      q.className = "mv-q " + (m.q < 0 ? "neg" : "pos");
+      q.textContent = (m.q > 0 ? "+" : "") + fq(m.q);
+      var meta = document.createElement("span");
+      meta.className = "mv-m";
+      meta.textContent = KIND[m.kind] + (m.note ? " · " + m.note : "") + " · " + fmtDate(m.t);
+      left.appendChild(q);
+      left.appendChild(meta);
+      var x = document.createElement("button");
+      x.type = "button";
+      x.className = "mv-x";
+      x.textContent = "Annuler";
+      x.setAttribute("data-i", String(i));
+      x.setAttribute("aria-label", "Annuler ce mouvement");
+      li.appendChild(left);
+      li.appendChild(x);
+      elLog.appendChild(li);
+    }
+    updateGap();
+  }
+
+  function updateGap() {
+    var it = curItem();
+    if (!it) return;
+    var c = parseAmount(inCount.value);
+    if (isNaN(c) || c < 0) {
+      setMsg(elGap, "Entrez la quantité réellement comptée pour voir l'écart.", false);
+      btnAdjust.disabled = true;
+      return;
+    }
+    var diff = parseFloat((c - level(it)).toPrecision(12));
+    if (diff === 0) {
+      setMsg(elGap, "Aucun écart : le stock compté correspond.", false);
+      btnAdjust.disabled = true;
+    } else if (diff < 0) {
+      setMsg(elGap, "Manque de " + fq(-diff) + " (affiché " + fq(level(it)) + ", compté " + fq(c) + ").", true);
+      btnAdjust.disabled = false;
+    } else {
+      setMsg(elGap, "Excédent de " + fq(diff) + " (affiché " + fq(level(it)) + ", compté " + fq(c) + ").", false);
+      btnAdjust.disabled = false;
+    }
+  }
+
+  function pushMove(it, q, kind, note) {
+    it.moves.push({ t: Date.now(), q: q, kind: kind, note: note });
+    if (it.moves.length > 500) {
+      var old = it.moves.shift();
+      it.start = (Number(it.start) || 0) + old.q;
+    }
+  }
+
+  function addMove(kind) {
+    var it = curItem();
+    if (!it) return;
+    var q = parseAmount(inQty.value);
+    if (isNaN(q) || q <= 0) {
+      setMsg(elStMsg, "Entrez une quantité supérieure à 0.", true);
+      focusEl(inQty);
+      return;
+    }
+    pushMove(it, kind === "out" ? -q : q, kind, inNote.value.trim().slice(0, 60));
+    saveStock();
+    inQty.value = "";
+    inNote.value = "";
+    renderStock();
+    var lv = level(it);
+    if (lv < 0) {
+      setMsg(elStMsg, "Sortie enregistrée, mais le stock est négatif (" + fq(lv) + "). Vérifiez les entrées.", true);
+    } else {
+      setMsg(elStMsg, (kind === "out" ? "Sortie de " : "Entrée de ") + fq(q) + " enregistrée. Stock : " + fq(lv) + ".", false);
+    }
+    focusEl(inQty);
+  }
+
+  gid("stBtnIn").addEventListener("click", function () { addMove("in"); });
+  gid("stBtnOut").addEventListener("click", function () { addMove("out"); });
+
+  elLog.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".mv-x");
+    if (!b) return;
+    var it = curItem();
+    var i = parseInt(b.getAttribute("data-i"), 10);
+    if (!it || isNaN(i) || !it.moves[i]) return;
+    it.moves.splice(i, 1);
+    saveStock();
+    renderStock();
+    setMsg(elStMsg, "Mouvement annulé.", false);
+  });
+
+  inCount.addEventListener("input", updateGap);
+  btnAdjust.addEventListener("click", function () {
+    var it = curItem();
+    if (!it) return;
+    var c = parseAmount(inCount.value);
+    if (isNaN(c) || c < 0) return;
+    var diff = parseFloat((c - level(it)).toPrecision(12));
+    if (diff === 0) return;
+    pushMove(it, diff, "adj", "Inventaire");
+    saveStock();
+    inCount.value = "";
+    renderStock();
+    setMsg(elStMsg, "Stock ajusté à " + fq(level(it)) + ".", false);
+  });
+
+  elSel.addEventListener("change", function () {
+    stock.sel = elSel.value;
+    saveStock();
+    inCount.value = "";
+    setMsg(elStMsg, "", false);
+    disarmDel();
+    renderStock();
+  });
+
+  gid("stNew").addEventListener("click", function () {
+    elCreate.hidden = false;
+    setMsg(crMsg, "", false);
+    focusEl(gid("crName"));
+  });
+  gid("crCancel").addEventListener("click", function () {
+    if (!stock.items.length) { setMsg(crMsg, "Créez au moins un article pour suivre un stock.", false); return; }
+    elCreate.hidden = true;
+  });
+  gid("crOk").addEventListener("click", function () {
+    var name = gid("crName").value.trim();
+    if (!name) { setMsg(crMsg, "Entrez le nom de l'article.", true); focusEl(gid("crName")); return; }
+    var startTxt = gid("crStart").value.trim();
+    var start = startTxt === "" ? 0 : parseAmount(startTxt);
+    if (isNaN(start) || start < 0) { setMsg(crMsg, "Le stock de départ doit être un nombre positif.", true); return; }
+    var id = "a" + Date.now().toString(36);
+    stock.items.push({ id: id, name: name.slice(0, 40), unit: gid("crUnit").value.trim().slice(0, 16), start: start, moves: [] });
+    stock.sel = id;
+    saveStock();
+    gid("crName").value = ""; gid("crUnit").value = ""; gid("crStart").value = "";
+    setMsg(crMsg, "", false);
+    elCreate.hidden = true;
+    disarmDel();
+    renderStock();
+  });
+
+  btnDel.addEventListener("click", function () {
+    var it = curItem();
+    if (!it) return;
+    if (btnDel.getAttribute("data-armed") !== "1") {
+      btnDel.setAttribute("data-armed", "1");
+      btnDel.textContent = "Touchez encore pour supprimer";
+      delTimer = setTimeout(disarmDel, 4000);
+      return;
+    }
+    stock.items = stock.items.filter(function (x) { return x.id !== it.id; });
+    stock.sel = stock.items.length ? stock.items[0].id : null;
+    saveStock();
+    disarmDel();
+    setMsg(elStMsg, "", false);
+    renderStock();
+  });
+
+  // ---- Cartons, palettes, pièces ----
+  var pk = { per: "24", pal: "40", unit: "pieces", qty: "250" };
+  try {
+    var sp = JSON.parse(localStorage.getItem("kajy-cartons") || "null");
+    if (sp && typeof sp === "object") {
+      if (typeof sp.per === "string") pk.per = sp.per;
+      if (typeof sp.pal === "string") pk.pal = sp.pal;
+      if (typeof sp.qty === "string") pk.qty = sp.qty;
+      if (sp.unit === "pieces" || sp.unit === "cartons" || sp.unit === "palettes") pk.unit = sp.unit;
+    }
+  } catch (e) {}
+  var pkPer = gid("pkPer"), pkPal = gid("pkPal"), pkQty = gid("pkQty"), pkSend = gid("pkSend");
+  var UNIT_BTN = { pieces: gid("pkUPieces"), cartons: gid("pkUCartons"), palettes: gid("pkUPalettes") };
+  var UNIT_LBL = { pieces: "Quantité en pièces", cartons: "Quantité en cartons", palettes: "Quantité en palettes" };
+  var pkPieces = 0;
+  pkPer.value = pk.per; pkPal.value = pk.pal; pkQty.value = pk.qty;
+
+  function savePk() { try { localStorage.setItem("kajy-cartons", JSON.stringify(pk)); } catch (e) {} }
+  function r3(x) { return parseFloat(x.toFixed(3)); }
+
+  function renderCartons() {
+    ["pieces", "cartons", "palettes"].forEach(function (u) {
+      UNIT_BTN[u].setAttribute("aria-pressed", pk.unit === u ? "true" : "false");
+    });
+    gid("pkQtyLbl").textContent = UNIT_LBL[pk.unit];
+    var per = parseAmount(pkPer.value), pal = parseAmount(pkPal.value), q = parseAmount(pkQty.value);
+    var out = { p: gid("pkPieces"), c: gid("pkCartons"), a: gid("pkPalettes") };
+    var brk = gid("pkBreak"), need = gid("pkNeed");
+    if (!(per > 0) || !(pal > 0)) {
+      out.p.textContent = out.c.textContent = out.a.textContent = "—";
+      brk.textContent = "";
+      need.textContent = "Indiquez combien de pièces dans un carton et combien de cartons dans une palette.";
+      pkSend.disabled = true;
+      return;
+    }
+    if (isNaN(q) || q < 0) {
+      out.p.textContent = out.c.textContent = out.a.textContent = "—";
+      brk.textContent = "";
+      need.textContent = "Entrez une quantité.";
+      pkSend.disabled = true;
+      return;
+    }
+    var perPal = per * pal;
+    var pieces = pk.unit === "pieces" ? q : pk.unit === "cartons" ? q * per : q * perPal;
+    pieces = parseFloat(pieces.toPrecision(12));
+    pkPieces = pieces;
+    out.p.textContent = fq(pieces);
+    out.c.textContent = fq(r3(pieces / per));
+    out.a.textContent = fq(r3(pieces / perPal));
+
+    var pw = Math.floor(pieces / perPal + 1e-9);
+    var rem = parseFloat((pieces - pw * perPal).toPrecision(12));
+    var cw = Math.floor(rem / per + 1e-9);
+    var pr = parseFloat((rem - cw * per).toPrecision(12));
+    var parts = [];
+    if (pw > 0) parts.push(fq(pw) + " " + pl(pw, "palette", "palettes"));
+    if (cw > 0) parts.push(fq(cw) + " " + pl(cw, "carton", "cartons"));
+    if (pr > 0) parts.push(fq(pr) + " " + pl(pr, "pièce", "pièces"));
+    brk.textContent = parts.length ? "= " + parts.join(" + ") : "= 0";
+    var whole = Math.ceil(pieces / per - 1e-9);
+    need.textContent = pieces > 0
+      ? "Cartons entiers à sortir : " + fq(whole) + (pr > 0 ? " (le dernier est ouvert)." : ".")
+      : "";
+    pkSend.disabled = false;
+  }
+
+  ["pieces", "cartons", "palettes"].forEach(function (u) {
+    UNIT_BTN[u].addEventListener("click", function () { pk.unit = u; savePk(); renderCartons(); });
+  });
+  [pkPer, pkPal, pkQty].forEach(function (el) {
+    el.addEventListener("input", function () {
+      pk.per = pkPer.value; pk.pal = pkPal.value; pk.qty = pkQty.value;
+      savePk();
+      renderCartons();
+    });
+  });
+  pkSend.addEventListener("click", function () {
+    var s = toStr(pkPieces);
+    if (s === null) return;
+    st.tokens = []; st.cur = s; st.fresh = true; st.error = false;
+    showTab("calc");
+    render();
+  });
+
+  var startTab = "calc";
+  try {
+    var t0 = localStorage.getItem("kajy-tab");
+    if (t0 === "stock" || t0 === "cartons") startTab = t0;
+  } catch (e) {}
   render();
+  showTab(startTab);
 })();
 </script>
 <script>
