@@ -238,8 +238,8 @@ body {
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--fn); border-radius: 999px; }
 .tab {
   flex: 1; min-width: 0;
-  font: inherit; font-size: 0.85rem; font-weight: 600;
-  padding: 8px 6px; border: 0; border-radius: 999px;
+  font: inherit; font-size: 0.78rem; font-weight: 600;
+  padding: 8px 2px; border: 0; border-radius: 999px;
   background: transparent; color: var(--ink); cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
@@ -292,6 +292,10 @@ body {
 .cnt-s { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 400; }
 .cnt-q { font-family: var(--font-num); font-size: 1.2rem; font-weight: 500; font-variant-numeric: tabular-nums; margin-left: auto; text-align: right; }
 .res > div[hidden] { display: none; }
+.card { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--key-edge); }
+.res.sm dd { font-size: clamp(1.15rem, 6vw, 1.5rem); }
+.res.sm > div { padding: 7px 0; }
+.res.sm dd small { font-size: 0.7em; color: var(--muted); font-family: var(--font-ui); margin-left: 4px; }
 .res { margin: 0; display: flex; flex-direction: column; }
 .res > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 0; border-top: 1px solid var(--key-edge); }
 .res dt { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
@@ -323,6 +327,7 @@ body {
     <button class="tab" id="tabStock" role="tab" aria-selected="false" type="button">Stock</button>
     <button class="tab" id="tabCartons" role="tab" aria-selected="false" type="button">Cartons</button>
     <button class="tab" id="tabCount" role="tab" aria-selected="false" type="button">Compter</button>
+    <button class="tab" id="tabMes" role="tab" aria-selected="false" type="button">Poids</button>
   </div>
 
   <div class="stage" id="viewCalc">
@@ -554,6 +559,67 @@ body {
       <button class="ghost" id="cnToCalc" type="button">Total vers la calculatrice</button>
     </div>
     <button class="ghost danger" id="cnClear" type="button" data-armed="0">Tout effacer</button>
+  </section>
+
+  <section class="view" id="viewMes" hidden aria-label="Poids et mesures">
+    <div class="card">
+      <h3>Poids total</h3>
+      <div class="row">
+        <div class="field grow">
+          <label for="pwUnitW">Poids d'une pièce</label>
+          <input id="pwUnitW" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="pwUnit">Unité</label>
+          <select id="pwUnit" class="in">
+            <option value="g">g</option><option value="kg" selected>kg</option><option value="lb">lb</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label for="pwQty">Quantité</label>
+          <input id="pwQty" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="1">
+        </div>
+      </div>
+      <dl class="res sm" role="status" aria-live="polite">
+        <div><dt>Poids total</dt><dd id="pwKg">—</dd></div>
+        <div><dt>En grammes</dt><dd id="pwG">—</dd></div>
+        <div><dt>En tonnes</dt><dd id="pwT">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Volume (cm)</h3>
+      <div class="row">
+        <div class="field grow"><label for="vlL">Long.</label><input id="vlL" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field grow"><label for="vlW">Larg.</label><input id="vlW" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field grow"><label for="vlH">Haut.</label><input id="vlH" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        <div class="field grow"><label for="vlQ">Quantité</label><input id="vlQ" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="1"></div>
+      </div>
+      <dl class="res sm" role="status" aria-live="polite">
+        <div><dt>Une pièce</dt><dd id="vlOne">—</dd></div>
+        <div><dt>Volume total</dt><dd id="vlTot">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Convertir une mesure</h3>
+      <div class="seg" role="group" aria-label="Type de mesure">
+        <button class="chip" id="cvW" type="button" aria-pressed="true">Poids</button>
+        <button class="chip" id="cvL" type="button" aria-pressed="false">Longueur</button>
+      </div>
+      <div class="row">
+        <div class="field grow">
+          <label for="cvVal">Valeur</label>
+          <input id="cvVal" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+        </div>
+        <div class="field">
+          <label for="cvUnit">Unité</label>
+          <select id="cvUnit" class="in"></select>
+        </div>
+      </div>
+      <dl class="res sm" id="cvOut" role="status" aria-live="polite"></dl>
+    </div>
+    <p class="note">Une livre (lb) vaut 0,4536 kg. Un pouce (in) vaut 2,54 cm. Vos valeurs sont gardées sur le téléphone.</p>
   </section>
 </div>
 <script>
@@ -1019,9 +1085,9 @@ body {
   // ---- Onglets ----
   function gid(id) { return document.getElementById(id); }
   var tab = "calc";
-  var TABS = ["calc", "stock", "cartons", "count"];
-  var viewEl = { calc: gid("viewCalc"), stock: gid("viewStock"), cartons: gid("viewCartons"), count: gid("viewCount") };
-  var tabEl = { calc: gid("tabCalc"), stock: gid("tabStock"), cartons: gid("tabCartons"), count: gid("tabCount") };
+  var TABS = ["calc", "stock", "cartons", "count", "mes"];
+  var viewEl = { calc: gid("viewCalc"), stock: gid("viewStock"), cartons: gid("viewCartons"), count: gid("viewCount"), mes: gid("viewMes") };
+  var tabEl = { calc: gid("tabCalc"), stock: gid("tabStock"), cartons: gid("tabCartons"), count: gid("tabCount"), mes: gid("tabMes") };
 
   function showTab(name) {
     tab = name;
@@ -1034,6 +1100,7 @@ body {
     if (name === "stock") renderStock();
     if (name === "cartons") renderCartons();
     if (name === "count") renderCount();
+    if (name === "mes") renderMes();
     try { localStorage.setItem("kajy-tab", name); } catch (e) {}
   }
   TABS.forEach(function (n) {
@@ -1542,10 +1609,89 @@ body {
     } catch (e) { ko(); }
   });
 
+  // ---- Poids et mesures ----
+  var W_KG = { g: 0.001, kg: 1, t: 1000, lb: 0.45359237, oz: 0.028349523125 };
+  var L_M = { mm: 0.001, cm: 0.01, m: 1, km: 1000, "in": 0.0254, ft: 0.3048 };
+  var mes = { uw: "", unit: "kg", qty: "1", l: "", w: "", h: "", vq: "1", cat: "w", cv: "", cu: "kg" };
+  try {
+    var sm = JSON.parse(localStorage.getItem("kajy-mesure") || "null");
+    if (sm && typeof sm === "object") {
+      ["uw", "qty", "l", "w", "h", "vq", "cv"].forEach(function (k) { if (typeof sm[k] === "string") mes[k] = sm[k]; });
+      if (sm.unit === "g" || sm.unit === "kg" || sm.unit === "lb") mes.unit = sm.unit;
+      if (sm.cat === "w" || sm.cat === "l") mes.cat = sm.cat;
+      if (typeof sm.cu === "string") mes.cu = sm.cu;
+    }
+  } catch (e) {}
+  var meIn = { uw: gid("pwUnitW"), qty: gid("pwQty"), l: gid("vlL"), w: gid("vlW"), h: gid("vlH"), vq: gid("vlQ"), cv: gid("cvVal") };
+  var meUnit = gid("pwUnit"), cvUnit = gid("cvUnit"), cvOut = gid("cvOut");
+  function saveMes() { try { localStorage.setItem("kajy-mesure", JSON.stringify(mes)); } catch (e) {} }
+  function fm(x) {
+    if (!isFinite(x)) return "—";
+    var a = Math.abs(x);
+    var r = parseFloat(x.toFixed(a >= 1000 ? 2 : a >= 1 ? 4 : 6));
+    var t = String(r);
+    if (t.indexOf("e") !== -1) t = "0";
+    return fmtNum(t);
+  }
+  function fillCv() {
+    var tbl = mes.cat === "w" ? W_KG : L_M;
+    if (!(mes.cu in tbl)) mes.cu = mes.cat === "w" ? "kg" : "m";
+    cvUnit.textContent = "";
+    Object.keys(tbl).forEach(function (u) {
+      var o = document.createElement("option");
+      o.value = u; o.textContent = u;
+      if (u === mes.cu) o.selected = true;
+      cvUnit.appendChild(o);
+    });
+  }
+  function setDd(el, text) { el.textContent = text; }
+  function renderMes() {
+    gid("cvW").setAttribute("aria-pressed", mes.cat === "w" ? "true" : "false");
+    gid("cvL").setAttribute("aria-pressed", mes.cat === "l" ? "true" : "false");
+    meUnit.value = mes.unit;
+    var uw = parseAmount(mes.uw), q = mes.qty.trim() === "" ? 1 : parseAmount(mes.qty);
+    if (isNaN(uw) || uw < 0 || isNaN(q) || q < 0 || mes.uw.trim() === "") {
+      setDd(gid("pwKg"), "—"); setDd(gid("pwG"), "—"); setDd(gid("pwT"), "—");
+    } else {
+      var kg = uw * W_KG[mes.unit] * q;
+      setDd(gid("pwKg"), fm(kg) + " kg"); setDd(gid("pwG"), fm(kg * 1000) + " g"); setDd(gid("pwT"), fm(kg / 1000) + " t");
+    }
+    var L = parseAmount(mes.l), Wd = parseAmount(mes.w), H = parseAmount(mes.h), vq = mes.vq.trim() === "" ? 1 : parseAmount(mes.vq);
+    if ([L, Wd, H, vq].some(function (v) { return isNaN(v) || v < 0; }) || mes.l.trim() === "" || mes.w.trim() === "" || mes.h.trim() === "") {
+      setDd(gid("vlOne"), "—"); setDd(gid("vlTot"), "—");
+    } else {
+      var cm3 = L * Wd * H;
+      setDd(gid("vlOne"), fm(cm3 / 1000) + " L");
+      setDd(gid("vlTot"), fm(cm3 * vq / 1e6) + " m³");
+    }
+    cvOut.textContent = "";
+    var v = parseAmount(mes.cv);
+    var tbl = mes.cat === "w" ? W_KG : L_M;
+    if (mes.cv.trim() !== "" && !isNaN(v) && mes.cu in tbl) {
+      var base = v * tbl[mes.cu];
+      Object.keys(tbl).forEach(function (u) {
+        if (u === mes.cu) return;
+        var row = document.createElement("div");
+        var dt = document.createElement("dt"); dt.textContent = u;
+        var dd = document.createElement("dd"); dd.textContent = fm(base / tbl[u]);
+        row.appendChild(dt); row.appendChild(dd); cvOut.appendChild(row);
+      });
+    }
+  }
+  fillCv();
+  Object.keys(meIn).forEach(function (k) {
+    meIn[k].value = mes[k];
+    meIn[k].addEventListener("input", function () { mes[k] = meIn[k].value; saveMes(); renderMes(); });
+  });
+  meUnit.addEventListener("change", function () { mes.unit = meUnit.value; saveMes(); renderMes(); });
+  cvUnit.addEventListener("change", function () { mes.cu = cvUnit.value; saveMes(); renderMes(); });
+  gid("cvW").addEventListener("click", function () { mes.cat = "w"; mes.cu = "kg"; fillCv(); saveMes(); renderMes(); });
+  gid("cvL").addEventListener("click", function () { mes.cat = "l"; mes.cu = "m"; fillCv(); saveMes(); renderMes(); });
+
   var startTab = "calc";
   try {
     var t0 = localStorage.getItem("kajy-tab");
-    if (t0 === "stock" || t0 === "cartons" || t0 === "count") startTab = t0;
+    if (t0 === "stock" || t0 === "cartons" || t0 === "count" || t0 === "mes") startTab = t0;
   } catch (e) {}
   render();
   showTab(startTab);
