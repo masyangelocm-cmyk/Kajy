@@ -1,6 +1,6 @@
 // Kajy : fonctionne hors ligne après la première ouverture.
 // Pour publier une mise à jour, changez VERSION (par exemple kajy-v2).
-const VERSION = "kajy-v7";
+const VERSION = "kajy-v9";
 const CORE = [
   "./",
   "index.html",
