@@ -543,11 +543,14 @@ body {
           <button class="btn" id="phDetect" type="button">Détecter automatiquement</button>
           <button class="chip" id="phPol" type="button" aria-pressed="false">Articles plus clairs que le fond</button>
         </div>
+        <div class="row ph-tools">
+          <button class="btn" id="phOne" type="button" aria-pressed="false">Compter un seul type d'article</button>
+        </div>
         <div class="field">
           <label for="phSens" id="phSensL">Sensibilité</label>
           <input id="phSens" type="range" min="-40" max="40" step="2" value="0">
         </div>
-        <p class="note">La détection est une aide : vérifiez les points. Touchez un article pour ajouter un point, touchez un point rouge pour l'enlever.</p>
+        <p class="note">La détection est une aide : vérifiez les points. Touchez un article pour ajouter un point, touchez un point rouge pour l'enlever. « Un seul type d'article » compte seulement ce qui ressemble à l'exemplaire touché (même couleur).</p>
         <div class="ph-count"><b id="phN">0</b><span id="phNl">articles marqués</span></div>
         <div class="ph-wrap" id="phWrap"><canvas id="phCv"></canvas></div>
         <div class="row ph-tools">
@@ -1751,6 +1754,10 @@ body {
       c.fillStyle = "rgba(214,60,44,0.9)"; c.fill();
       c.lineWidth = Math.max(2, r * 0.2); c.strokeStyle = "#fff"; c.stroke();
     });
+    if (typeof phSample !== "undefined" && phSample) {
+      c.beginPath(); c.arc(phSample.x, phSample.y, r * 1.8, 0, Math.PI * 2);
+      c.lineWidth = Math.max(3, r * 0.3); c.strokeStyle = "#2f7de1"; c.stroke();
+    }
   }
   function phApplyZoom() {
     var w = Math.max(phWrap.clientWidth, 200);
@@ -1772,7 +1779,7 @@ body {
       var max = 1600, k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
       phCv.width = Math.max(1, Math.round(im.naturalWidth * k));
       phCv.height = Math.max(1, Math.round(im.naturalHeight * k));
-      phImg = im; phDots = []; phZoom = 1; phAuto = false; phBright = null; gid("phPol").setAttribute("aria-pressed", "false"); gid("phPol").textContent = "Articles plus clairs que le fond"; gid("phSens").value = "0";
+      phImg = im; phDots = []; phZoom = 1; phAuto = false; phBright = null; phSample = null; phPicking = false; gid("phPol").setAttribute("aria-pressed", "false"); gid("phPol").textContent = "Articles plus clairs que le fond"; gid("phSens").value = "0";
       phWork.hidden = false;
       phApplyZoom(); phCount(); phDraw();
       setMsg(phMsg, "", false);
@@ -1787,6 +1794,13 @@ body {
     var rc = phCv.getBoundingClientRect();
     var x = (ev.clientX - rc.left) * (phCv.width / rc.width);
     var y = (ev.clientY - rc.top) * (phCv.height / rc.height);
+    if (phPicking) {
+      phPicking = false;
+      gid("phOne").setAttribute("aria-pressed", "false");
+      phSample = { x: x, y: y };
+      runDetect();
+      return;
+    }
     var r = Math.max(10, phCv.width * 0.011) * 1.4, hit = -1;
     phDots.forEach(function (d, i) { if (Math.hypot(d.x - x, d.y - y) <= r) hit = i; });
     if (hit >= 0) phDots.splice(hit, 1); else phDots.push({ x: x, y: y });
@@ -1808,7 +1822,7 @@ body {
   phCount();
 
   // ---- Détection automatique (sur le téléphone, sans connexion) ----
-  var phBright = null, phAuto = false, phTimer = null;
+  var phBright = null, phAuto = false, phTimer = null, phSample = null, phPicking = false;
   function otsu(g, n) {
     var h = new Array(256).fill(0), i;
     for (i = 0; i < n; i++) h[g[i]]++;
@@ -1837,7 +1851,10 @@ body {
     t = Math.max(1, Math.min(254, t + offset));
     var m = new Uint8Array(n);
     for (i = 0; i < n; i++) m[i] = bright ? (g[i] > t ? 1 : 0) : (g[i] <= t ? 1 : 0);
-    // ouverture 3x3 (retire le bruit)
+    return { dots: maskToDots(m, W, H, img), bright: bright };
+  }
+  function maskToDots(m, W, H, img) {
+    var n = W * H, i;
     function erode(a) { var o = new Uint8Array(n), x, y; for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++) { var k = y * W + x; o[k] = a[k] && a[k - 1] && a[k + 1] && a[k - W] && a[k + W] ? 1 : 0; } return o; }
     function dilate(a) { var o = new Uint8Array(n), x, y; for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++) { var k = y * W + x; o[k] = a[k] || a[k - 1] || a[k + 1] || a[k - W] || a[k + W] ? 1 : 0; } return o; }
     m = dilate(erode(m));
@@ -1857,7 +1874,7 @@ body {
     }
     var minA = Math.max(12, n * 0.0006), maxA = n * 0.4;
     comps = comps.filter(function (c) { return c.length >= minA && c.length <= maxA; });
-    if (!comps.length) return { dots: [], bright: bright };
+    if (!comps.length) return [];
     var areas = comps.map(function (c) { return c.length; }).sort(function (a, b) { return a - b; });
     var med = areas[Math.floor(areas.length / 2)];
     var sx = img.width / W, sy = img.height / H, dots = [];
@@ -1886,21 +1903,48 @@ body {
       }
       cen.forEach(function (cc) { dots.push({ x: (cc[0] + 0.5) * sx, y: (cc[1] + 0.5) * sy }); });
     });
-    return { dots: dots, bright: bright };
+    return dots;
+  }
+  function detectSimilar(img, fx, fy, tol) {
+    var W = 320, H = Math.max(1, Math.round(W * img.height / img.width));
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var cx = cv.getContext("2d"); cx.drawImage(img, 0, 0, W, H);
+    var d = cx.getImageData(0, 0, W, H).data, n = W * H;
+    var px = Math.max(2, Math.min(W - 3, Math.round(fx * W))), py = Math.max(2, Math.min(H - 3, Math.round(fy * H)));
+    var r0 = 0, g0 = 0, b0 = 0, c0 = 0, x, y;
+    for (y = py - 2; y <= py + 2; y++) for (x = px - 2; x <= px + 2; x++) { var q = (y * W + x) * 4; r0 += d[q]; g0 += d[q + 1]; b0 += d[q + 2]; c0++; }
+    r0 /= c0; g0 /= c0; b0 /= c0;
+    var m = new Uint8Array(n), t2 = tol * tol, i;
+    for (i = 0; i < n; i++) {
+      var dr = d[i * 4] - r0, dg = d[i * 4 + 1] - g0, db = d[i * 4 + 2] - b0;
+      m[i] = dr * dr + dg * dg + db * db <= t2 ? 1 : 0;
+    }
+    return maskToDots(m, W, H, img);
   }
   function runDetect() {
     if (!phImg) return;
     var res;
-    try { res = detectDots(phImg, phBright, parseInt(gid("phSens").value, 10) || 0); } catch (e) { setMsg(phMsg, "Détection impossible sur cette photo. Marquez à la main.", true); return; }
+    try {
+      var sv = parseInt(gid("phSens").value, 10) || 0;
+      if (phSample) res = { dots: detectSimilar(phImg, phSample.x / phCv.width, phSample.y / phCv.height, 60 + sv * 1.2), bright: phBright };
+      else res = detectDots(phImg, phBright, sv);
+    } catch (e) { setMsg(phMsg, "Détection impossible sur cette photo. Marquez à la main.", true); return; }
     phAuto = true;
     if (phBright === null) { phBright = res.bright; }
     gid("phPol").setAttribute("aria-pressed", phBright ? "true" : "false");
     gid("phPol").textContent = phBright ? "Articles plus clairs que le fond" : "Articles plus sombres que le fond";
     phDots = res.dots; phCount(); phDraw();
-    setMsg(phMsg, res.dots.length ? res.dots.length + " détectés. Vérifiez, puis corrigez en touchant." : "Rien détecté. Changez la sensibilité ou « plus clairs / plus sombres ».", !res.dots.length);
+    setMsg(phMsg, res.dots.length && phSample ? res.dots.length + " de ce type. Vérifiez, puis corrigez en touchant." : res.dots.length ? res.dots.length + " détectés. Vérifiez, puis corrigez en touchant." : "Rien trouvé. Changez la sensibilité ou « plus clairs / plus sombres ».", !res.dots.length);
   }
-  gid("phDetect").addEventListener("click", runDetect);
+  gid("phDetect").addEventListener("click", function () { phSample = null; phPicking = false; gid("phOne").setAttribute("aria-pressed", "false"); runDetect(); });
+  gid("phOne").addEventListener("click", function () {
+    if (!phImg) return;
+    phPicking = true;
+    gid("phOne").setAttribute("aria-pressed", "true");
+    setMsg(phMsg, "Touchez un exemplaire de l'article à compter (un tuyau, par exemple).", false);
+  });
   gid("phPol").addEventListener("click", function () {
+    phSample = null;
     if (phBright === null) phBright = true; else phBright = !phBright;
     gid("phPol").setAttribute("aria-pressed", phBright ? "true" : "false");
     gid("phPol").textContent = phBright ? "Articles plus clairs que le fond" : "Articles plus sombres que le fond";
