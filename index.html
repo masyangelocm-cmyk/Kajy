@@ -238,7 +238,7 @@ body {
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--fn); border-radius: 999px; }
 .tab {
   flex: 1; min-width: 0;
-  font: inherit; font-size: 0.9rem; font-weight: 600;
+  font: inherit; font-size: 0.85rem; font-weight: 600;
   padding: 8px 6px; border: 0; border-radius: 999px;
   background: transparent; color: var(--ink); cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
@@ -284,6 +284,14 @@ body {
 .mv-m { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
 .mv-x { font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: 1.5px solid var(--key-edge); border-radius: 999px; padding: 5px 10px; cursor: pointer; flex: none; }
 .ghost.danger { color: var(--clear); border-color: var(--clear); align-self: flex-start; }
+
+.cnt-list { list-style: none; margin: 0; padding: 0; }
+.cnt-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--key-edge); }
+.cnt-list li.none { color: var(--muted); font-size: 0.9rem; }
+.cnt-r { font-weight: 600; overflow-wrap: anywhere; }
+.cnt-s { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 400; }
+.cnt-q { font-family: var(--font-num); font-size: 1.2rem; font-weight: 500; font-variant-numeric: tabular-nums; margin-left: auto; text-align: right; }
+.res > div[hidden] { display: none; }
 .res { margin: 0; display: flex; flex-direction: column; }
 .res > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 0; border-top: 1px solid var(--key-edge); }
 .res dt { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
@@ -314,6 +322,7 @@ body {
     <button class="tab" id="tabCalc" role="tab" aria-selected="true" type="button">Calcul</button>
     <button class="tab" id="tabStock" role="tab" aria-selected="false" type="button">Stock</button>
     <button class="tab" id="tabCartons" role="tab" aria-selected="false" type="button">Cartons</button>
+    <button class="tab" id="tabCount" role="tab" aria-selected="false" type="button">Compter</button>
   </div>
 
   <div class="stage" id="viewCalc">
@@ -507,6 +516,44 @@ body {
     <div class="actions">
       <button class="btn" id="pkSend" type="button">Envoyer à la calculatrice</button>
     </div>
+  </section>
+
+  <section class="view" id="viewCount" hidden aria-label="Compter les articles par référence">
+    <div class="row">
+      <div class="field grow2">
+        <label for="cnRef">Référence</label>
+        <input id="cnRef" class="in left" type="text" autocomplete="off" maxlength="30" placeholder="Ex. A102 ou Huile 5 L">
+      </div>
+      <div class="field grow">
+        <label for="cnQty">Quantité</label>
+        <input id="cnQty" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field grow">
+        <label for="cnPrice">Prix unitaire (Ar)</label>
+        <input id="cnPrice" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+      </div>
+      <button class="btn" id="cnAdd" type="button">Ajouter</button>
+    </div>
+    <p class="msg" id="cnMsg" role="status" aria-live="polite"></p>
+
+    <dl class="res" role="status" aria-live="polite">
+      <div><dt>Références</dt><dd id="cnRefs">0</dd></div>
+      <div><dt>Total articles</dt><dd id="cnTotal">0</dd></div>
+      <div id="cnValBox" hidden><dt>Valeur (Ar)</dt><dd id="cnValue">0</dd></div>
+    </dl>
+
+    <div class="log">
+      <h3>Comptage</h3>
+      <ul class="cnt-list" id="cnList"></ul>
+    </div>
+    <p class="note">Ajouter deux fois la même référence additionne les quantités. Une quantité négative corrige une erreur.</p>
+    <div class="actions">
+      <button class="ghost" id="cnCopy" type="button">Copier le récapitulatif</button>
+      <button class="ghost" id="cnToCalc" type="button">Total vers la calculatrice</button>
+    </div>
+    <button class="ghost danger" id="cnClear" type="button" data-armed="0">Tout effacer</button>
   </section>
 </div>
 <script>
@@ -972,9 +1019,9 @@ body {
   // ---- Onglets ----
   function gid(id) { return document.getElementById(id); }
   var tab = "calc";
-  var TABS = ["calc", "stock", "cartons"];
-  var viewEl = { calc: gid("viewCalc"), stock: gid("viewStock"), cartons: gid("viewCartons") };
-  var tabEl = { calc: gid("tabCalc"), stock: gid("tabStock"), cartons: gid("tabCartons") };
+  var TABS = ["calc", "stock", "cartons", "count"];
+  var viewEl = { calc: gid("viewCalc"), stock: gid("viewStock"), cartons: gid("viewCartons"), count: gid("viewCount") };
+  var tabEl = { calc: gid("tabCalc"), stock: gid("tabStock"), cartons: gid("tabCartons"), count: gid("tabCount") };
 
   function showTab(name) {
     tab = name;
@@ -986,6 +1033,7 @@ body {
     if (name !== "calc") showPanel(null);
     if (name === "stock") renderStock();
     if (name === "cartons") renderCartons();
+    if (name === "count") renderCount();
     try { localStorage.setItem("kajy-tab", name); } catch (e) {}
   }
   TABS.forEach(function (n) {
@@ -1347,10 +1395,157 @@ body {
     render();
   });
 
+  // ---- Compter par référence ----
+  var cnt = { items: [] };
+  try {
+    var sc = JSON.parse(localStorage.getItem("kajy-count") || "null");
+    if (sc && Array.isArray(sc.items)) {
+      cnt.items = sc.items.filter(function (x) {
+        return x && typeof x.ref === "string" && typeof x.qty === "number" && isFinite(x.qty) && (x.price === null || (typeof x.price === "number" && isFinite(x.price)));
+      });
+    }
+  } catch (e) {}
+  var cnRef = gid("cnRef"), cnQty = gid("cnQty"), cnPrice = gid("cnPrice"), cnMsg = gid("cnMsg");
+  var cnClear = gid("cnClear"), cnTimer = null;
+  function saveCnt() { try { localStorage.setItem("kajy-count", JSON.stringify(cnt)); } catch (e) {} }
+  function disarmCn() {
+    cnClear.setAttribute("data-armed", "0");
+    cnClear.textContent = "Tout effacer";
+    if (cnTimer) { clearTimeout(cnTimer); cnTimer = null; }
+  }
+  function cnTotals() {
+    var q = 0, v = 0, hasPrice = false;
+    cnt.items.forEach(function (x) {
+      q += x.qty;
+      if (x.price !== null) { v += x.qty * x.price; hasPrice = true; }
+    });
+    return { q: parseFloat(q.toPrecision(12)), v: parseFloat(v.toPrecision(12)), hasPrice: hasPrice };
+  }
+  function renderCount() {
+    var tt = cnTotals();
+    gid("cnRefs").textContent = String(cnt.items.length);
+    gid("cnTotal").textContent = fq(tt.q);
+    gid("cnValBox").hidden = !tt.hasPrice;
+    gid("cnValue").textContent = fq(tt.v);
+    var ul = gid("cnList");
+    ul.textContent = "";
+    if (!cnt.items.length) {
+      var none = document.createElement("li");
+      none.className = "none";
+      none.textContent = "Rien compté. Entrez une référence et une quantité.";
+      ul.appendChild(none);
+    }
+    cnt.items.forEach(function (x, i) {
+      var li = document.createElement("li");
+      var left = document.createElement("div");
+      left.className = "mv-l";
+      var r = document.createElement("span");
+      r.className = "cnt-r";
+      r.textContent = x.ref;
+      left.appendChild(r);
+      if (x.price !== null) {
+        var sub = document.createElement("span");
+        sub.className = "cnt-s";
+        sub.textContent = fq(x.price) + " Ar × " + fq(x.qty) + " = " + fq(parseFloat((x.price * x.qty).toPrecision(12))) + " Ar";
+        left.appendChild(sub);
+      }
+      var q = document.createElement("b");
+      q.className = "cnt-q";
+      q.textContent = fq(x.qty);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mv-x";
+      b.textContent = "Retirer";
+      b.setAttribute("data-i", String(i));
+      b.setAttribute("aria-label", "Retirer la référence " + x.ref);
+      li.appendChild(left);
+      li.appendChild(q);
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+    gid("cnCopy").disabled = !cnt.items.length;
+    gid("cnToCalc").disabled = !cnt.items.length;
+    cnClear.hidden = !cnt.items.length;
+  }
+  function addCount() {
+    var ref = cnRef.value.replace(/\s+/g, " ").trim();
+    var q = parseAmount(cnQty.value);
+    if (!ref) { setMsg(cnMsg, "Entrez une référence.", true); focusEl(cnRef); return; }
+    if (isNaN(q) || q === 0) { setMsg(cnMsg, "Entrez une quantité (différente de 0).", true); focusEl(cnQty); return; }
+    var pr = null;
+    if (cnPrice.value.trim() !== "") {
+      pr = parseAmount(cnPrice.value);
+      if (isNaN(pr) || pr < 0) { setMsg(cnMsg, "Prix invalide.", true); focusEl(cnPrice); return; }
+    }
+    var key = ref.toLowerCase();
+    var it = null;
+    cnt.items.forEach(function (x) { if (x.ref.toLowerCase() === key) it = x; });
+    if (it) {
+      it.qty = parseFloat((it.qty + q).toPrecision(12));
+      if (pr !== null) it.price = pr;
+    } else {
+      cnt.items.push({ ref: ref, qty: q, price: pr });
+    }
+    saveCnt();
+    cnRef.value = ""; cnQty.value = ""; cnPrice.value = "";
+    setMsg(cnMsg, it ? "Quantité ajoutée." : "Référence ajoutée.", false);
+    renderCount();
+    focusEl(cnRef);
+  }
+  gid("cnAdd").addEventListener("click", addCount);
+  [cnRef, cnQty, cnPrice].forEach(function (el) {
+    el.addEventListener("keydown", function (ev) { if (ev.key === "Enter") { ev.preventDefault(); addCount(); } });
+  });
+  gid("cnList").addEventListener("click", function (ev) {
+    var b = ev.target.closest(".mv-x");
+    if (!b) return;
+    var i = parseInt(b.getAttribute("data-i"), 10);
+    if (isNaN(i) || !cnt.items[i]) return;
+    cnt.items.splice(i, 1);
+    saveCnt();
+    renderCount();
+    setMsg(cnMsg, "Référence retirée.", false);
+  });
+  cnClear.addEventListener("click", function () {
+    if (cnClear.getAttribute("data-armed") !== "1") {
+      cnClear.setAttribute("data-armed", "1");
+      cnClear.textContent = "Toucher encore pour effacer";
+      cnTimer = setTimeout(disarmCn, 4000);
+      return;
+    }
+    cnt.items = [];
+    saveCnt();
+    disarmCn();
+    setMsg(cnMsg, "Comptage effacé.", false);
+    renderCount();
+  });
+  gid("cnToCalc").addEventListener("click", function () {
+    var s2 = toStr(cnTotals().q);
+    if (s2 === null) return;
+    st.tokens = []; st.cur = s2; st.fresh = true; st.error = false;
+    showTab("calc");
+    render();
+  });
+  gid("cnCopy").addEventListener("click", function () {
+    var tt = cnTotals();
+    var lines = ["Comptage Kajy"];
+    cnt.items.forEach(function (x) {
+      lines.push(x.ref + " : " + fq(x.qty) + (x.price !== null ? " × " + fq(x.price) + " Ar = " + fq(parseFloat((x.qty * x.price).toPrecision(12))) + " Ar" : ""));
+    });
+    lines.push("Total : " + fq(tt.q) + " articles, " + cnt.items.length + " " + pl(cnt.items.length, "référence", "références") + (tt.hasPrice ? ", valeur " + fq(tt.v) + " Ar" : ""));
+    var text = lines.join("\n");
+    function ok() { setMsg(cnMsg, "Récapitulatif copié.", false); }
+    function ko() { setMsg(cnMsg, "Copie impossible. Recopiez la liste à la main.", true); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, ko);
+      else ko();
+    } catch (e) { ko(); }
+  });
+
   var startTab = "calc";
   try {
     var t0 = localStorage.getItem("kajy-tab");
-    if (t0 === "stock" || t0 === "cartons") startTab = t0;
+    if (t0 === "stock" || t0 === "cartons" || t0 === "count") startTab = t0;
   } catch (e) {}
   render();
   showTab(startTab);
