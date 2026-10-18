@@ -100,10 +100,14 @@ body {
   font: inherit; font-size: 0.85rem; font-weight: 600;
   color: var(--ink); background: transparent;
   border: 1.5px solid var(--key-edge); border-radius: 999px;
-  padding: 7px 14px; cursor: pointer;
+  padding: 9px 14px; min-height: 40px; cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .ghost[aria-expanded="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.ghost:disabled { opacity: 0.4; cursor: default; }
+.ghost, .btn, .chip { transition: transform 0.08s ease, background-color 0.12s ease; }
+.ghost:active, .btn:active, .chip:active, .tab:active, .zbtn:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .ghost, .btn, .chip { transition: none; } .ghost:active, .btn:active, .chip:active, .tab:active, .zbtn:active { transform: none; } }
 
 .stage {
   position: relative;
@@ -202,7 +206,7 @@ body {
 .seg { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .chip {
   font: inherit; font-size: 0.9rem; font-weight: 600;
-  padding: 8px 16px; border-radius: 999px;
+  padding: 9px 16px; min-height: 40px; border-radius: 999px;
   border: 1.5px solid var(--key-edge); background: transparent; color: var(--ink);
   cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
@@ -230,7 +234,7 @@ body {
 .btn {
   font: inherit; font-weight: 600; font-size: 0.95rem;
   background: var(--op); color: var(--op-ink);
-  border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer;
+  border: 0; border-radius: 999px; padding: 11px 20px; min-height: 44px; cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .btn:disabled { opacity: 0.4; cursor: default; }
@@ -238,8 +242,8 @@ body {
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--fn); border-radius: 999px; }
 .tab {
   flex: 1; min-width: 0;
-  font: inherit; font-size: 0.78rem; font-weight: 600;
-  padding: 8px 2px; border: 0; border-radius: 999px;
+  font: inherit; font-size: 0.8rem; font-weight: 600;
+  padding: 11px 2px; min-height: 42px; border: 0; border-radius: 999px;
   background: transparent; color: var(--ink); cursor: pointer;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
@@ -247,7 +251,7 @@ body {
 .tab:focus-visible, .mv-x:focus-visible, select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 .view { flex: 1 1 0; min-height: 0; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 6px; }
-.view h3 { margin: 0; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.view h3 { margin: 0; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); font-weight: 600; }
 .stock-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .row { display: flex; gap: 8px; align-items: flex-end; min-width: 0; }
 .grow { flex: 1 1 0; min-width: 0; }
@@ -282,7 +286,7 @@ body {
 .mv-q.pos { color: var(--focus); }
 .mv-q.neg { color: var(--clear); }
 .mv-m { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
-.mv-x { font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: 1.5px solid var(--key-edge); border-radius: 999px; padding: 5px 10px; cursor: pointer; flex: none; }
+.mv-x { font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: 1.5px solid var(--key-edge); border-radius: 999px; padding: 8px 12px; min-height: 36px; cursor: pointer; flex: none; }
 .ghost.danger { color: var(--clear); border-color: var(--clear); align-self: flex-start; }
 
 .cnt-list { list-style: none; margin: 0; padding: 0; }
@@ -294,14 +298,38 @@ body {
 .res > div[hidden] { display: none; }
 .ph-panel[hidden], #phWork[hidden] { display: none; }
 .ph-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
-.ph-pick { text-align: center; cursor: pointer; display: block; }
+.ph-pick { text-align: center; cursor: pointer; }
 .ph-count { display: flex; align-items: baseline; gap: 8px; }
 .ph-count b { font-family: var(--font-num); font-size: 2.2rem; font-weight: 400; font-variant-numeric: tabular-nums; }
 .ph-count span { color: var(--muted); font-size: 0.85rem; }
-.ph-wrap { overflow: auto; max-height: 52vh; border-radius: 12px; border: 1.5px solid var(--key-edge); background: #000; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; }
+.ph-wrap { overflow: auto; max-height: 50vh; border-radius: 12px; border: 1.5px solid var(--key-edge); background: #000; touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; }
 .ph-wrap canvas { display: block; height: auto; max-width: none; cursor: crosshair; }
-.ph-tools { flex-wrap: wrap; align-items: center; }
-.card { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--key-edge); }
+.fold { display: flex; justify-content: space-between; align-items: center; width: 100%; font: inherit; font-size: 0.95rem; font-weight: 600; color: var(--ink); background: var(--key); border: 1.5px solid var(--key-edge); border-radius: 14px; padding: 12px 16px; min-height: 48px; cursor: pointer; touch-action: manipulation; }
+.fold::after { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform 0.15s ease; }
+.fold[aria-expanded="true"]::after { transform: rotate(-135deg) translateY(-2px); }
+.btn.alt { background: transparent; color: var(--ink); border: 1.5px solid var(--op); }
+.btn.alt[aria-pressed="true"] { background: var(--op); color: var(--op-ink); }
+.btn.block, .ph-pick { display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; }
+.ph-modes, .ph-undo, .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ph-pol { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.ph-modes .btn { padding: 10px 8px; font-size: 0.9rem; white-space: nowrap; }
+@media (max-width: 350px) {
+  .tabs { gap: 2px; padding: 3px; }
+  .tab { font-size: 0.7rem; padding: 11px 0; letter-spacing: -0.01em; }
+  .ph-pol .chip { padding: 8px 10px; font-size: 0.8rem; }
+  .row { gap: 6px; }
+  .in { padding: 9px 8px; }
+}
+.ph-pol > span { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.ph-pol .chip { padding: 8px 12px; font-size: 0.85rem; }
+.ph-box { position: relative; }
+.ph-zoom { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
+.zbtn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: rgba(20,32,29,0.78); color: #fff; font: inherit; font-size: 1.3rem; line-height: 1; cursor: pointer; touch-action: manipulation; }
+input[type="range"] { accent-color: var(--op); width: 100%; height: 32px; margin: 0; }
+.ghost.center { align-self: center; }
+.res dt { font-size: 0.75rem; }
+.seg { display: flex; gap: 8px; flex-wrap: wrap; }
+.card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1.5px solid var(--key-edge); border-radius: 16px; }
 .res.sm dd { font-size: clamp(1.15rem, 6vw, 1.5rem); }
 .res.sm > div { padding: 7px 0; }
 .res.sm dd small { font-size: 0.7em; color: var(--muted); font-family: var(--font-ui); margin-left: 4px; }
@@ -327,7 +355,7 @@ body {
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand"><b>Kajy</b><span>Calculatrice</span></div>
+    <div class="brand"><b>Kajy</b><span id="brandSub">Calculatrice</span></div>
     <button class="ghost" id="histBtn" type="button" aria-expanded="false" aria-controls="history">Historique</button>
   </div>
 
@@ -533,29 +561,39 @@ body {
   </section>
 
   <section class="view" id="viewCount" hidden aria-label="Compter les articles par référence">
-    <button class="ghost" id="phOpen" type="button" aria-expanded="false" aria-controls="phPanel">Compter sur une photo</button>
+    <button class="fold" id="phOpen" type="button" aria-expanded="false" aria-controls="phPanel">Compter sur une photo</button>
     <div class="card ph-panel" id="phPanel" hidden>
       <h3>Compter sur une photo</h3>
-      <label class="btn ph-pick" for="phFile">Prendre ou choisir une photo</label>
+      <label class="btn ph-pick block" for="phFile">Prendre ou choisir une photo</label>
       <input id="phFile" class="ph-file" type="file" accept="image/*">
       <div id="phWork" hidden>
-        <div class="row ph-tools">
-          <button class="btn" id="phDetect" type="button">Détecter automatiquement</button>
-          <button class="chip" id="phPol" type="button" aria-pressed="false">Articles plus clairs que le fond</button>
+        <div class="ph-modes">
+          <button class="btn" id="phDetect" type="button">Tout détecter</button>
+          <button class="btn alt" id="phOne" type="button" aria-pressed="false">Un seul type</button>
+          <button class="btn alt" id="phRound" type="button" aria-pressed="false">Formes rondes</button>
+          <button class="btn alt" id="phZone" type="button" aria-pressed="false">Délimiter la zone</button>
         </div>
-        <div class="row ph-tools">
-          <button class="btn" id="phOne" type="button" aria-pressed="false">Compter un seul type d'article</button>
+        <div class="ph-pol">
+          <span>Articles</span>
+          <div class="seg" role="group" aria-label="Couleur des articles par rapport au fond">
+            <button class="chip" id="phPolL" type="button" aria-pressed="false">plus clairs</button>
+            <button class="chip" id="phPolD" type="button" aria-pressed="false">plus sombres</button>
+          </div>
         </div>
         <div class="field">
           <label for="phSens" id="phSensL">Sensibilité</label>
           <input id="phSens" type="range" min="-40" max="40" step="2" value="0">
         </div>
-        <p class="note">La détection est une aide : vérifiez les points. Touchez un article pour ajouter un point, touchez un point rouge pour l'enlever. « Un seul type d'article » compte seulement ce qui ressemble à l'exemplaire touché (même couleur).</p>
+        <p class="note">Aide à la détection : vérifiez les points. Touchez la photo pour ajouter un point, touchez un point pour l'enlever. « Un seul type » garde la couleur de l'exemplaire touché. « Formes rondes » repère les bouts de tuyaux. « Zone » ignore tout ce qui est autour du tas.</p>
         <div class="ph-count"><b id="phN">0</b><span id="phNl">articles marqués</span></div>
-        <div class="ph-wrap" id="phWrap"><canvas id="phCv"></canvas></div>
-        <div class="row ph-tools">
-          <button class="ghost" id="phZm" type="button" aria-label="Zoom arrière">−</button>
-          <button class="ghost" id="phZp" type="button" aria-label="Zoom avant">+</button>
+        <div class="ph-box">
+          <div class="ph-wrap" id="phWrap"><canvas id="phCv"></canvas></div>
+          <div class="ph-zoom">
+            <button class="zbtn" id="phZp" type="button" aria-label="Zoom avant">+</button>
+            <button class="zbtn" id="phZm" type="button" aria-label="Zoom arrière">−</button>
+          </div>
+        </div>
+        <div class="ph-undo">
           <button class="ghost" id="phUndo" type="button">Annuler le dernier</button>
           <button class="ghost" id="phReset" type="button">Recommencer</button>
         </div>
@@ -599,11 +637,11 @@ body {
       <ul class="cnt-list" id="cnList"></ul>
     </div>
     <p class="note">Ajouter deux fois la même référence additionne les quantités. Une quantité négative corrige une erreur.</p>
-    <div class="actions">
-      <button class="ghost" id="cnCopy" type="button">Copier le récapitulatif</button>
-      <button class="ghost" id="cnToCalc" type="button">Total vers la calculatrice</button>
+    <div class="duo">
+      <button class="ghost" id="cnCopy" type="button">Copier la liste</button>
+      <button class="ghost" id="cnToCalc" type="button">Total → calcul</button>
     </div>
-    <button class="ghost danger" id="cnClear" type="button" data-armed="0">Tout effacer</button>
+    <button class="ghost danger center" id="cnClear" type="button" data-armed="0">Tout effacer</button>
   </section>
 
   <section class="view" id="viewMes" hidden aria-label="Poids et mesures">
@@ -611,7 +649,7 @@ body {
       <h3>Poids total</h3>
       <div class="row">
         <div class="field grow">
-          <label for="pwUnitW">Poids d'une pièce</label>
+          <label for="pwUnitW">Par pièce</label>
           <input id="pwUnitW" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
         </div>
         <div class="field">
@@ -626,7 +664,7 @@ body {
         </div>
       </div>
       <dl class="res sm" role="status" aria-live="polite">
-        <div><dt>Poids total</dt><dd id="pwKg">—</dd></div>
+        <div><dt>En kilos</dt><dd id="pwKg">—</dd></div>
         <div><dt>En grammes</dt><dd id="pwG">—</dd></div>
         <div><dt>En tonnes</dt><dd id="pwT">—</dd></div>
       </dl>
@@ -641,7 +679,7 @@ body {
         <div class="field grow"><label for="vlQ">Quantité</label><input id="vlQ" class="in" type="text" inputmode="decimal" autocomplete="off" placeholder="1"></div>
       </div>
       <dl class="res sm" role="status" aria-live="polite">
-        <div><dt>Une pièce</dt><dd id="vlOne">—</dd></div>
+        <div><dt>Par pièce</dt><dd id="vlOne">—</dd></div>
         <div><dt>Volume total</dt><dd id="vlTot">—</dd></div>
       </dl>
     </div>
@@ -1141,6 +1179,7 @@ body {
       tabEl[n].setAttribute("aria-selected", n === name ? "true" : "false");
     });
     btnHist.hidden = name !== "calc";
+    gid("brandSub").textContent = { calc: "Calculatrice", stock: "Stock du magasin", cartons: "Cartons et palettes", count: "Comptage", mes: "Poids et mesures" }[name];
     if (name !== "calc") showPanel(null);
     if (name === "stock") renderStock();
     if (name === "cartons") renderCartons();
@@ -1592,15 +1631,17 @@ body {
     var key = ref.toLowerCase();
     var it = null;
     cnt.items.forEach(function (x) { if (x.ref.toLowerCase() === key) it = x; });
+    var removed = false;
     if (it) {
       it.qty = parseFloat((it.qty + q).toPrecision(12));
       if (pr !== null) it.price = pr;
+      if (it.qty === 0) { cnt.items = cnt.items.filter(function (x) { return x !== it; }); removed = true; }
     } else {
       cnt.items.push({ ref: ref, qty: q, price: pr });
     }
     saveCnt();
     cnRef.value = ""; cnQty.value = ""; cnPrice.value = "";
-    setMsg(cnMsg, it ? "Quantité ajoutée." : "Référence ajoutée.", false);
+    setMsg(cnMsg, removed ? "Quantité à 0 : référence retirée." : it ? "Quantité ajoutée." : "Référence ajoutée.", false);
     renderCount();
     focusEl(cnRef);
   }
@@ -1754,7 +1795,17 @@ body {
       c.fillStyle = "rgba(214,60,44,0.9)"; c.fill();
       c.lineWidth = Math.max(2, r * 0.2); c.strokeStyle = "#fff"; c.stroke();
     });
-    if (typeof phSample !== "undefined" && phSample) {
+    if (phZone) {
+      c.fillStyle = "rgba(0,0,0,0.45)";
+      c.fillRect(0, 0, phCv.width, phZone.y0);
+      c.fillRect(0, phZone.y1, phCv.width, phCv.height - phZone.y1);
+      c.fillRect(0, phZone.y0, phZone.x0, phZone.y1 - phZone.y0);
+      c.fillRect(phZone.x1, phZone.y0, phCv.width - phZone.x1, phZone.y1 - phZone.y0);
+      c.lineWidth = Math.max(3, phCv.width * 0.004); c.strokeStyle = "#2f7de1"; c.setLineDash([phCv.width * 0.02, phCv.width * 0.012]);
+      c.strokeRect(phZone.x0, phZone.y0, phZone.x1 - phZone.x0, phZone.y1 - phZone.y0); c.setLineDash([]);
+    }
+    if (phZoneA) { c.beginPath(); c.arc(phZoneA.x, phZoneA.y, r * 1.4, 0, Math.PI * 2); c.fillStyle = "#2f7de1"; c.fill(); }
+    if (phMode === "sample" && phSample) {
       c.beginPath(); c.arc(phSample.x, phSample.y, r * 1.8, 0, Math.PI * 2);
       c.lineWidth = Math.max(3, r * 0.3); c.strokeStyle = "#2f7de1"; c.stroke();
     }
@@ -1779,13 +1830,13 @@ body {
       var max = 1600, k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
       phCv.width = Math.max(1, Math.round(im.naturalWidth * k));
       phCv.height = Math.max(1, Math.round(im.naturalHeight * k));
-      phImg = im; phDots = []; phZoom = 1; phAuto = false; phBright = null; phSample = null; phPicking = false; gid("phPol").setAttribute("aria-pressed", "false"); gid("phPol").textContent = "Articles plus clairs que le fond"; gid("phSens").value = "0";
+      phImg = im; phDots = []; phZoom = 1; phAuto = false; phBright = null; phSample = null; phPicking = false; phMode = "auto"; phZone = null; phZonePick = 0; phZoneA = null; syncModes(); gid("phSens").value = "0"; try { URL.revokeObjectURL(url); } catch (e) {}
       phWork.hidden = false;
       phApplyZoom(); phCount(); phDraw();
       setMsg(phMsg, "", false);
       try { phWrap.scrollTop = 0; phWrap.scrollLeft = 0; } catch (e) {}
     };
-    im.onerror = function () { setMsg(phMsg, "Photo illisible. Essayez une autre photo.", true); phWork.hidden = false; };
+    im.onerror = function () { try { URL.revokeObjectURL(url); } catch (e) {} setMsg(phMsg, "Photo illisible. Essayez une autre photo.", true); phWork.hidden = false; };
     im.src = url;
     phFile.value = "";
   });
@@ -1794,10 +1845,20 @@ body {
     var rc = phCv.getBoundingClientRect();
     var x = (ev.clientX - rc.left) * (phCv.width / rc.width);
     var y = (ev.clientY - rc.top) * (phCv.height / rc.height);
+    if (phZonePick === 1) { phZoneA = { x: x, y: y }; phZonePick = 2; phDraw(); setMsg(phMsg, "Maintenant le coin en bas à droite.", false); return; }
+    if (phZonePick === 2) {
+      var x0 = Math.min(phZoneA.x, x), x1 = Math.max(phZoneA.x, x), y0 = Math.min(phZoneA.y, y), y1 = Math.max(phZoneA.y, y);
+      phZonePick = 0; phZoneA = null;
+      if (x1 - x0 < 30 || y1 - y0 < 30) { syncModes(); phDraw(); setMsg(phMsg, "Zone trop petite. Recommencez.", true); return; }
+      phZone = { x0: x0, y0: y0, x1: x1, y1: y1 };
+      syncModes(); phDraw();
+      if (phAuto) runDetect(); else setMsg(phMsg, "Zone prête. Touchez « Tout détecter » ou « Formes rondes ».", false);
+      return;
+    }
     if (phPicking) {
-      phPicking = false;
-      gid("phOne").setAttribute("aria-pressed", "false");
+      phPicking = false; phMode = "sample";
       phSample = { x: x, y: y };
+      syncModes();
       runDetect();
       return;
     }
@@ -1819,10 +1880,11 @@ body {
     phReset();
     setMsg(phMsg, "Ajouté au comptage.", false);
   });
+  gid("phRef").addEventListener("keydown", function (ev) { if (ev.key === "Enter") { ev.preventDefault(); phAdd.click(); } });
   phCount();
 
   // ---- Détection automatique (sur le téléphone, sans connexion) ----
-  var phBright = null, phAuto = false, phTimer = null, phSample = null, phPicking = false;
+  var phBright = null, phAuto = false, phTimer = null, phSample = null, phPicking = false, phMode = "auto", phZone = null, phZonePick = 0, phZoneA = null;
   function otsu(g, n) {
     var h = new Array(256).fill(0), i;
     for (i = 0; i < n; i++) h[g[i]]++;
@@ -1837,20 +1899,34 @@ body {
     }
     return t;
   }
-  function detectDots(img, bright, offset) {
+  function zoneMask(zone, W, H) {
+    if (!zone) return null;
+    var z = new Uint8Array(W * H), x, y;
+    var x0 = Math.max(0, Math.floor(zone.x0 * W)), x1 = Math.min(W - 1, Math.ceil(zone.x1 * W));
+    var y0 = Math.max(0, Math.floor(zone.y0 * H)), y1 = Math.min(H - 1, Math.ceil(zone.y1 * H));
+    for (y = y0; y <= y1; y++) for (x = x0; x <= x1; x++) z[y * W + x] = 1;
+    return z;
+  }
+  function detectDots(img, bright, offset, zone) {
     var W = 320, H = Math.max(1, Math.round(W * img.height / img.width));
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
     var cx = cv.getContext("2d"); cx.drawImage(img, 0, 0, W, H);
     var d = cx.getImageData(0, 0, W, H).data, n = W * H, g = new Uint8Array(n), i;
     for (i = 0; i < n; i++) g[i] = (d[i * 4] * 299 + d[i * 4 + 1] * 587 + d[i * 4 + 2] * 114) / 1000;
-    var t = otsu(g, n);
+    var zm = zoneMask(zone, W, H), gz = g, nz = n;
+    if (zm) {
+      var inside = []; for (i = 0; i < n; i++) if (zm[i]) inside.push(g[i]);
+      if (inside.length < 50) return { dots: [], bright: bright };
+      gz = Uint8Array.from(inside); nz = gz.length;
+    }
+    var t = otsu(gz, nz);
     if (bright === null) {
-      var above = 0; for (i = 0; i < n; i++) if (g[i] > t) above++;
-      bright = above < n / 2;
+      var above = 0; for (i = 0; i < nz; i++) if (gz[i] > t) above++;
+      bright = above < nz / 2;
     }
     t = Math.max(1, Math.min(254, t + offset));
     var m = new Uint8Array(n);
-    for (i = 0; i < n; i++) m[i] = bright ? (g[i] > t ? 1 : 0) : (g[i] <= t ? 1 : 0);
+    for (i = 0; i < n; i++) m[i] = (!zm || zm[i]) ? (bright ? (g[i] > t ? 1 : 0) : (g[i] <= t ? 1 : 0)) : 0;
     return { dots: maskToDots(m, W, H, img), bright: bright };
   }
   function maskToDots(m, W, H, img) {
@@ -1905,7 +1981,7 @@ body {
     });
     return dots;
   }
-  function detectSimilar(img, fx, fy, tol) {
+  function detectSimilar(img, fx, fy, tol, zone) {
     var W = 320, H = Math.max(1, Math.round(W * img.height / img.width));
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
     var cx = cv.getContext("2d"); cx.drawImage(img, 0, 0, W, H);
@@ -1919,37 +1995,132 @@ body {
       var dr = d[i * 4] - r0, dg = d[i * 4 + 1] - g0, db = d[i * 4 + 2] - b0;
       m[i] = dr * dr + dg * dg + db * db <= t2 ? 1 : 0;
     }
+    var zm = zoneMask(zone, W, H);
+    if (zm) for (i = 0; i < n; i++) m[i] &= zm[i];
     return maskToDots(m, W, H, img);
+  }
+  function detectRound(img, factor, zone) {
+    var W = 360, H = Math.max(1, Math.round(W * img.height / img.width)), n = W * H;
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    var cx = cv.getContext("2d"); cx.drawImage(img, 0, 0, W, H);
+    var d = cx.getImageData(0, 0, W, H).data, g = new Float32Array(n), i, x, y;
+    for (i = 0; i < n; i++) g[i] = (d[i * 4] * 299 + d[i * 4 + 1] * 587 + d[i * 4 + 2] * 114) / 1000;
+    var b = new Float32Array(n);
+    for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++) {
+      var k = y * W + x;
+      b[k] = (g[k - W - 1] + g[k - W] + g[k - W + 1] + g[k - 1] + g[k] + g[k + 1] + g[k + W - 1] + g[k + W] + g[k + W + 1]) / 9;
+    }
+    var gx = new Float32Array(n), gy = new Float32Array(n), mag = new Float32Array(n), mx = 0;
+    var zm = zoneMask(zone, W, H);
+    for (y = 2; y < H - 2; y++) for (x = 2; x < W - 2; x++) {
+      var q = y * W + x;
+      if (zm && !zm[q]) continue;
+      var sx = (b[q - W + 1] + 2 * b[q + 1] + b[q + W + 1]) - (b[q - W - 1] + 2 * b[q - 1] + b[q + W - 1]);
+      var sy = (b[q + W - 1] + 2 * b[q + W] + b[q + W + 1]) - (b[q - W - 1] + 2 * b[q - W] + b[q - W + 1]);
+      gx[q] = sx; gy[q] = sy; mag[q] = Math.sqrt(sx * sx + sy * sy);
+      if (mag[q] > mx) mx = mag[q];
+    }
+    if (mx < 20) return [];
+    var thr = Math.max(16, mx * 0.3);
+    var rmin = Math.max(5, Math.round(W * 0.014)), rmax = Math.round(W * 0.16), nr = rmax - rmin + 1;
+    var acc = new Float32Array(nr * n), ri, sgn;
+    for (i = 0; i < n; i++) {
+      if (mag[i] < thr) continue;
+      var ux = gx[i] / mag[i], uy = gy[i] / mag[i];
+      x = i % W; y = (i - x) / W;
+      for (ri = 0; ri < nr; ri++) {
+        var r = rmin + ri;
+        for (sgn = -1; sgn <= 1; sgn += 2) {
+          var px = Math.round(x + sgn * ux * r), py = Math.round(y + sgn * uy * r);
+          if (px >= 1 && px < W - 1 && py >= 1 && py < H - 1) acc[ri * n + py * W + px] += 1;
+        }
+      }
+    }
+    var cands = [], need = Math.max(0.2, Math.min(0.9, factor));
+    for (ri = 0; ri < nr; ri++) {
+      var rr = rmin + ri, base = ri * n, circ = 2 * Math.PI * rr;
+      for (y = 2; y < H - 2; y++) for (x = 2; x < W - 2; x++) {
+        var c0 = base + y * W + x;
+        if (acc[c0] < 3) continue;
+        var sm = acc[c0 - W - 1] + acc[c0 - W] + acc[c0 - W + 1] + acc[c0 - 1] + acc[c0] + acc[c0 + 1] + acc[c0 + W - 1] + acc[c0 + W] + acc[c0 + W + 1];
+        var sc = sm / circ;
+        if (sc >= need) cands.push({ x: x, y: y, r: rr, s: sc });
+      }
+    }
+    if (!cands.length) return [];
+    cands.sort(function (a, b2) { return b2.s - a.s; });
+    function nms(list) {
+      var out = [];
+      list.forEach(function (c) {
+        for (var j = 0; j < out.length; j++) {
+          var o = out[j];
+          if (Math.hypot(o.x - c.x, o.y - c.y) < 0.75 * Math.max(o.r, c.r)) return;
+        }
+        out.push(c);
+      });
+      return out;
+    }
+    var first = nms(cands.slice(0, 4000));
+    var hist = {}, best = 0, rStar = first[0].r;
+    first.forEach(function (c) {
+      var bin = Math.round(c.r / 2) * 2;
+      hist[bin] = (hist[bin] || 0) + c.s;
+    });
+    Object.keys(hist).forEach(function (kk) { if (hist[kk] > best) { best = hist[kk]; rStar = parseInt(kk, 10); } });
+    var tol = Math.max(3, rStar * 0.22);
+    var band = cands.filter(function (c) { return Math.abs(c.r - rStar) <= tol; });
+    var fin = nms(band.slice(0, 6000));
+    var kx = img.width / W, ky = img.height / H;
+    return fin.map(function (c) { return { x: (c.x + 0.5) * kx, y: (c.y + 0.5) * ky }; });
   }
   function runDetect() {
     if (!phImg) return;
-    var res;
+    var res, sv = parseInt(gid("phSens").value, 10) || 0;
+    var zf = phZone ? { x0: phZone.x0 / phCv.width, y0: phZone.y0 / phCv.height, x1: phZone.x1 / phCv.width, y1: phZone.y1 / phCv.height } : null;
     try {
-      var sv = parseInt(gid("phSens").value, 10) || 0;
-      if (phSample) res = { dots: detectSimilar(phImg, phSample.x / phCv.width, phSample.y / phCv.height, 60 + sv * 1.2), bright: phBright };
-      else res = detectDots(phImg, phBright, sv);
+      if (phMode === "round") res = { dots: detectRound(phImg, 0.5 - sv * 0.005, zf), bright: phBright };
+      else if (phMode === "sample" && phSample) res = { dots: detectSimilar(phImg, phSample.x / phCv.width, phSample.y / phCv.height, 60 + sv * 1.2, zf), bright: phBright };
+      else res = detectDots(phImg, phBright, sv, zf);
     } catch (e) { setMsg(phMsg, "Détection impossible sur cette photo. Marquez à la main.", true); return; }
     phAuto = true;
     if (phBright === null) { phBright = res.bright; }
-    gid("phPol").setAttribute("aria-pressed", phBright ? "true" : "false");
-    gid("phPol").textContent = phBright ? "Articles plus clairs que le fond" : "Articles plus sombres que le fond";
+    syncPol();
     phDots = res.dots; phCount(); phDraw();
-    setMsg(phMsg, res.dots.length && phSample ? res.dots.length + " de ce type. Vérifiez, puis corrigez en touchant." : res.dots.length ? res.dots.length + " détectés. Vérifiez, puis corrigez en touchant." : "Rien trouvé. Changez la sensibilité ou « plus clairs / plus sombres ».", !res.dots.length);
+    var what = phMode === "round" ? " formes rondes" : phMode === "sample" ? " de ce type" : " détectés";
+    var zn = phZone ? " dans la zone" : "";
+    setMsg(phMsg, res.dots.length ? res.dots.length + what + zn + ". Vérifiez, puis corrigez en touchant." : "Rien trouvé. Changez la sensibilité" + (phMode === "auto" ? " ou « plus clairs / plus sombres »" : "") + ".", !res.dots.length);
   }
-  gid("phDetect").addEventListener("click", function () { phSample = null; phPicking = false; gid("phOne").setAttribute("aria-pressed", "false"); runDetect(); });
+  function syncModes() {
+    gid("phOne").setAttribute("aria-pressed", phMode === "sample" || phPicking ? "true" : "false");
+    gid("phRound").setAttribute("aria-pressed", phMode === "round" ? "true" : "false");
+    gid("phZone").setAttribute("aria-pressed", phZone || phZonePick ? "true" : "false");
+    gid("phZone").textContent = phZone ? "Effacer la zone" : phZonePick ? "Annuler la zone" : "Délimiter la zone";
+    syncPol();
+  }
+  gid("phDetect").addEventListener("click", function () { phMode = "auto"; phSample = null; phPicking = false; syncModes(); runDetect(); });
   gid("phOne").addEventListener("click", function () {
     if (!phImg) return;
-    phPicking = true;
-    gid("phOne").setAttribute("aria-pressed", "true");
+    phPicking = true; phZonePick = 0; syncModes();
     setMsg(phMsg, "Touchez un exemplaire de l'article à compter (un tuyau, par exemple).", false);
   });
-  gid("phPol").addEventListener("click", function () {
-    phSample = null;
-    if (phBright === null) phBright = true; else phBright = !phBright;
-    gid("phPol").setAttribute("aria-pressed", phBright ? "true" : "false");
-    gid("phPol").textContent = phBright ? "Articles plus clairs que le fond" : "Articles plus sombres que le fond";
-    runDetect();
+  gid("phRound").addEventListener("click", function () { phMode = "round"; phSample = null; phPicking = false; syncModes(); runDetect(); });
+  gid("phZone").addEventListener("click", function () {
+    if (!phImg) return;
+    if (phZone || phZonePick) {
+      phZone = null; phZonePick = 0; phZoneA = null; syncModes(); phDraw();
+      if (phAuto) runDetect(); else setMsg(phMsg, "Zone effacée.", false);
+      return;
+    }
+    phZonePick = 1; phPicking = false; syncModes();
+    setMsg(phMsg, "Touchez le coin en haut à gauche du tas, puis le coin en bas à droite.", false);
   });
+  function syncPol() {
+    gid("phPolL").setAttribute("aria-pressed", phBright === true && phMode === "auto" ? "true" : "false");
+    gid("phPolD").setAttribute("aria-pressed", phBright === false && phMode === "auto" ? "true" : "false");
+  }
+  function setPol(v) { phMode = "auto"; phSample = null; phPicking = false; phBright = v; syncModes(); runDetect(); }
+  gid("phPolL").addEventListener("click", function () { setPol(true); });
+  gid("phPolD").addEventListener("click", function () { setPol(false); });
   gid("phSens").addEventListener("input", function () {
     if (!phAuto) return;
     if (phTimer) clearTimeout(phTimer);
