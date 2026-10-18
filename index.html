@@ -322,6 +322,10 @@ body {
 }
 .ph-pol > span { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .ph-pol .chip { padding: 8px 12px; font-size: 0.85rem; }
+.ph-ai { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1.5px dashed var(--key-edge); border-radius: 14px; }
+.ph-key summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); padding: 6px 0; }
+.ph-key[open] { display: flex; flex-direction: column; gap: 10px; }
+.ph-key[open] summary { margin-bottom: 2px; }
 .ph-box { position: relative; }
 .ph-zoom { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
 .zbtn { width: 40px; height: 40px; border-radius: 12px; border: 0; background: rgba(20,32,29,0.78); color: #fff; font: inherit; font-size: 1.3rem; line-height: 1; cursor: pointer; touch-action: manipulation; }
@@ -572,6 +576,32 @@ input[type="range"] { accent-color: var(--op); width: 100%; height: 32px; margin
           <button class="btn alt" id="phOne" type="button" aria-pressed="false">Un seul type</button>
           <button class="btn alt" id="phRound" type="button" aria-pressed="false">Formes rondes</button>
           <button class="btn alt" id="phZone" type="button" aria-pressed="false">Délimiter la zone</button>
+        </div>
+        <div class="ph-ai">
+          <div class="field">
+            <label for="phWhat">Article à compter (pour l'IA)</label>
+            <input id="phWhat" class="in left" type="text" autocomplete="off" maxlength="60" placeholder="Ex. tuyaux PVC, sacs de riz">
+          </div>
+          <button class="btn block" id="phAI" type="button">Compter avec l'IA (internet)</button>
+          <details class="ph-key" id="phKeyBox">
+            <summary>Clé d'accès de l'IA</summary>
+            <div class="field">
+              <label for="phKey">Clé personnelle</label>
+              <input id="phKey" class="in left" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-...">
+            </div>
+            <div class="field">
+              <label for="phModel">Modèle</label>
+              <select id="phModel" class="in">
+                <option value="claude-sonnet-5-5">Précis (recommandé)</option>
+                <option value="claude-haiku-5-5">Économique</option>
+              </select>
+            </div>
+            <div class="duo">
+              <button class="ghost" id="phKeySave" type="button">Enregistrer</button>
+              <button class="ghost danger" id="phKeyDel" type="button">Supprimer</button>
+            </div>
+            <p class="note">La clé reste sur ce téléphone. La photo est envoyée à Anthropic pour être analysée, ce qui coûte quelques centimes par photo sur votre compte. Ne partagez jamais votre clé.</p>
+          </details>
         </div>
         <div class="ph-pol">
           <span>Articles</span>
@@ -1852,7 +1882,7 @@ input[type="range"] { accent-color: var(--op); width: 100%; height: 32px; margin
       if (x1 - x0 < 30 || y1 - y0 < 30) { syncModes(); phDraw(); setMsg(phMsg, "Zone trop petite. Recommencez.", true); return; }
       phZone = { x0: x0, y0: y0, x1: x1, y1: y1 };
       syncModes(); phDraw();
-      if (phAuto) runDetect(); else setMsg(phMsg, "Zone prête. Touchez « Tout détecter » ou « Formes rondes ».", false);
+      if (phAuto && phMode !== "ai") runDetect(); else setMsg(phMsg, "Zone prête. Touchez « Tout détecter » ou « Formes rondes ».", false);
       return;
     }
     if (phPicking) {
@@ -2108,7 +2138,7 @@ input[type="range"] { accent-color: var(--op); width: 100%; height: 32px; margin
     if (!phImg) return;
     if (phZone || phZonePick) {
       phZone = null; phZonePick = 0; phZoneA = null; syncModes(); phDraw();
-      if (phAuto) runDetect(); else setMsg(phMsg, "Zone effacée.", false);
+      if (phAuto && phMode !== "ai") runDetect(); else setMsg(phMsg, "Zone effacée.", false);
       return;
     }
     phZonePick = 1; phPicking = false; syncModes();
@@ -2122,9 +2152,106 @@ input[type="range"] { accent-color: var(--op); width: 100%; height: 32px; margin
   gid("phPolL").addEventListener("click", function () { setPol(true); });
   gid("phPolD").addEventListener("click", function () { setPol(false); });
   gid("phSens").addEventListener("input", function () {
-    if (!phAuto) return;
+    if (!phAuto || phMode === "ai") return;
     if (phTimer) clearTimeout(phTimer);
     phTimer = setTimeout(runDetect, 200);
+  });
+
+  // ---- Compter avec l'IA (clé personnelle, internet) ----
+  var ai = { key: "", model: "claude-sonnet-5-5" };
+  try {
+    var sa = JSON.parse(localStorage.getItem("kajy-ai") || "null");
+    if (sa && typeof sa.key === "string") ai.key = sa.key;
+    if (sa && (sa.model === "claude-sonnet-5-5" || sa.model === "claude-haiku-5-5")) ai.model = sa.model;
+  } catch (e) {}
+  var phKey = gid("phKey"), phModel = gid("phModel"), phAI = gid("phAI"), aiBusy = false;
+  phKey.value = ai.key; phModel.value = ai.model;
+  function saveAi() { try { localStorage.setItem("kajy-ai", JSON.stringify(ai)); } catch (e) {} }
+  gid("phKeySave").addEventListener("click", function () {
+    ai.key = phKey.value.trim(); ai.model = phModel.value; saveAi();
+    setMsg(phMsg, ai.key ? "Clé enregistrée sur ce téléphone." : "Entrez votre clé.", !ai.key);
+    if (ai.key) gid("phKeyBox").open = false;
+  });
+  gid("phKeyDel").addEventListener("click", function () {
+    ai.key = ""; phKey.value = ""; saveAi(); setMsg(phMsg, "Clé supprimée.", false);
+  });
+  phModel.addEventListener("change", function () { ai.model = phModel.value; saveAi(); });
+  function aiImage() {
+    var sw = phImg.naturalWidth || phImg.width, sh = phImg.naturalHeight || phImg.height;
+    var k0 = sw / phCv.width, sx = 0, sy = 0, cw = sw, ch = sh;
+    if (phZone) { sx = phZone.x0 * k0; sy = phZone.y0 * k0; cw = (phZone.x1 - phZone.x0) * k0; ch = (phZone.y1 - phZone.y0) * k0; }
+    var k = Math.min(1, 1500 / Math.max(cw, ch));
+    var cv = document.createElement("canvas");
+    cv.width = Math.max(1, Math.round(cw * k)); cv.height = Math.max(1, Math.round(ch * k));
+    cv.getContext("2d").drawImage(phImg, sx, sy, cw, ch, 0, 0, cv.width, cv.height);
+    return cv.toDataURL("image/jpeg", 0.85).split(",")[1];
+  }
+  function aiPrompt(what) {
+    return "Tu aides un magasinier à compter des articles sur une photo. " +
+      "Article à compter : " + (what ? what : "les articles principaux qui se répètent sur la photo") + ". " +
+      "Compte chaque exemplaire visible, y compris ceux en partie cachés quand on voit clairement qu'ils existent. Ignore tous les autres objets. Sois rigoureux : parcours la photo ligne par ligne. " +
+      "Réponds UNIQUEMENT par un objet JSON, sans texte autour, de la forme " +
+      '{"total": nombre entier, "points": [{"x": 0.0, "y": 0.0}], "remarque": "phrase courte"} ' +
+      "où chaque point est le centre approximatif d'un exemplaire compté, en fraction de l'image (x de gauche à droite, y de haut en bas, valeurs entre 0 et 1).";
+  }
+  function aiParse(text) {
+    var m = /\{[\s\S]*\}/.exec(text || "");
+    if (!m) return null;
+    var o;
+    try { o = JSON.parse(m[0]); } catch (e) { return null; }
+    if (!o || typeof o.total !== "number" || !isFinite(o.total) || o.total < 0) return null;
+    var pts = [];
+    if (Array.isArray(o.points)) o.points.forEach(function (q) {
+      if (q && typeof q.x === "number" && typeof q.y === "number" && q.x >= 0 && q.x <= 1 && q.y >= 0 && q.y <= 1) pts.push({ x: q.x, y: q.y });
+    });
+    return { total: Math.round(o.total), points: pts, note: typeof o.remarque === "string" ? o.remarque : "" };
+  }
+  phAI.addEventListener("click", function () {
+    if (!phImg || aiBusy) return;
+    if (!ai.key) { gid("phKeyBox").open = true; setMsg(phMsg, "Entrez d'abord votre clé d'accès de l'IA.", true); focusEl(phKey); return; }
+    var what = gid("phWhat").value.trim(), data;
+    try { data = aiImage(); } catch (e) { setMsg(phMsg, "Photo impossible à envoyer. Essayez une autre photo.", true); return; }
+    aiBusy = true; phAI.disabled = true; phAI.textContent = "Analyse en cours…";
+    setMsg(phMsg, "L'IA analyse la photo, cela peut prendre 10 à 30 secondes.", false);
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var to = setTimeout(function () { if (ctl) ctl.abort(); }, 70000);
+    function done() { clearTimeout(to); aiBusy = false; phAI.disabled = false; phAI.textContent = "Compter avec l'IA (internet)"; }
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": ai.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model: ai.model, max_tokens: 3000, messages: [{ role: "user", content: [
+        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: data } },
+        { type: "text", text: aiPrompt(what) } ] }] }),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (j) { return { ok: res.ok, status: res.status, j: j }; });
+    }).then(function (r) {
+      done();
+      if (!r.ok) {
+        var em = r.j && r.j.error && r.j.error.message ? String(r.j.error.message) : "";
+        if (r.status === 401 || r.status === 403) setMsg(phMsg, "Clé refusée. Vérifiez-la dans « Clé d'accès de l'IA ».", true);
+        else if (r.status === 429 || r.status === 529) setMsg(phMsg, "Service occupé. Réessayez dans un instant.", true);
+        else if (/credit|balance/i.test(em)) setMsg(phMsg, "Crédit insuffisant sur votre compte de l'IA.", true);
+        else setMsg(phMsg, "L'IA a refusé la demande (code " + r.status + ").", true);
+        return;
+      }
+      var text = "";
+      (r.j.content || []).forEach(function (c) { if (c && c.type === "text") text += c.text; });
+      var out = aiParse(text);
+      if (!out) { setMsg(phMsg, "Réponse illisible. Réessayez.", true); return; }
+      var zx = phZone ? phZone.x0 : 0, zy = phZone ? phZone.y0 : 0;
+      var zw = phZone ? phZone.x1 - phZone.x0 : phCv.width, zh = phZone ? phZone.y1 - phZone.y0 : phCv.height;
+      phMode = "ai"; phSample = null; phPicking = false; phAuto = true;
+      phDots = out.points.map(function (q) { return { x: zx + q.x * zw, y: zy + q.y * zh }; });
+      syncModes(); phCount(); phDraw();
+      var msg = out.points.length === out.total
+        ? "L'IA compte " + out.total + "."
+        : "L'IA annonce " + out.total + " mais place " + out.points.length + " points. Vérifiez.";
+      setMsg(phMsg, msg + (out.note ? " " + out.note : "") + " Corrigez en touchant si besoin.", out.points.length !== out.total);
+    }).catch(function (e) {
+      done();
+      setMsg(phMsg, e && e.name === "AbortError" ? "Trop long. Réessayez avec une photo plus simple." : "Pas de connexion internet. Réessayez plus tard.", true);
+    });
   });
 
   var startTab = "calc";

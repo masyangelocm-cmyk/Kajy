@@ -1,0 +1,22 @@
+KAJY, version finale
+====================
+
+Fichiers (tous au même niveau, sans sous-dossier) :
+  index.html, sw.js, manifest.webmanifest
+  icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png
+
+Mise à jour d'un Kajy déjà publié :
+1. Décompresser ce zip avec l'application Fichiers.
+2. Sur github.com, ouvrir le dépôt Kajy > Add file > Upload files.
+3. Envoyer les 7 fichiers (LISEZMOI.txt est inutile). Commit changes.
+4. Attendre environ 1 minute, fermer Kajy complètement, la rouvrir deux fois.
+
+Adresse : https://masyangelocm-cmyk.github.io/Kajy/
+
+Contenu : calculatrice (parenthèses, historique, conversion Ar), stock (entrées, sorties,
+inventaire), cartons/palettes, comptage par référence (avec photo : détection, un seul type,
+formes rondes, zone, et IA avec clé personnelle), poids et mesures. Les données restent sur le téléphone.
+Ne jamais effacer les "données du site" dans Chrome : cela supprime le stock et les comptages.
+
+IA (facultatif) : dans Compter > photo > « Clé d'accès de l'IA », collez votre clé personnelle (console.anthropic.com).
+La clé reste sur le téléphone ; chaque analyse de photo coûte quelques centimes.

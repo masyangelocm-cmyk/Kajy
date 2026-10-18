@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Kajy, calculatrice",
   "short_name": "Kajy",
-  "description": "Calculatrice avec parenthèses, historique et conversion euro, dollar, ariary.",
+  "description": "Calculatrice du magasinier : stock, cartons, comptage par photo, poids et mesures, conversion en ariary.",
   "lang": "fr",
   "dir": "ltr",
   "start_url": "./",
